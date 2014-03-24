@@ -1,8 +1,6 @@
 package socialdj.main;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Locale;
 
 
@@ -191,14 +189,18 @@ public class MainActivity extends FragmentActivity implements
 			//Socket socket = null;
 
 			if(!(params[0].equals(nonActiveIp))){
+				ConnectedSocket socket = new ConnectedSocket();
 				try {
 					System.out.println("Saved server :" + params[0]);
-					ConnectedSocket socket = new ConnectedSocket();
 					socket.connect(new InetSocketAddress(params[0].trim(), standardPort), 2000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if(socket.isConnected()) {
+					ipAddress = params[0].trim();
+					socket.setConnectedIP(ipAddress);
 					connected = true;
-					ipAddress = params[0];
-					socket.setConnectedIP(params[0]);
-				} catch (Exception e) {e.printStackTrace();}
+				}
 			}
 			return null;
 		}

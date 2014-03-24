@@ -197,10 +197,15 @@ public class ConnectActivity extends Activity {
 						
 						//if (currentlyClicked == v)
 							//return;
-
-						currentlyClicked.setChecked(false);
-						((RadioButton) v).setChecked(true);
-						currentlyClicked = (RadioButton) v;
+						
+						//catch exception if radio button(server) no longer exists
+						try {
+							currentlyClicked.setChecked(false);
+							((RadioButton) v).setChecked(true);
+							currentlyClicked = (RadioButton) v;
+						} catch(NullPointerException e) {
+							Log.v("ConvertView", String.valueOf("Server no longer exist"));
+						}
 
 					}  
 				});  

@@ -3,6 +3,7 @@ package socialdj;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ConnectedSocket {
   private static Socket socket = null;
@@ -10,7 +11,7 @@ public class ConnectedSocket {
 
   public ConnectedSocket() {
 	  socket = new Socket();
-	  ipAddress = "empty";
+	  ipAddress = "0.0.0.0";
   }
   
   public static Socket getSocket() {
@@ -36,5 +37,9 @@ public class ConnectedSocket {
 	  try {
 		socket.connect(inetSocketAddress, timeout);
 	} catch (IOException e) {e.printStackTrace();}
+  }
+
+  public static boolean isConnected() {
+	  return socket.isConnected();
   }
 }
