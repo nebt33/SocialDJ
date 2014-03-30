@@ -6,13 +6,16 @@ import socialdj.config.R;
 
 
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.app.FragmentTransaction;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +37,8 @@ ActionBar.TabListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.library);
+		
+		setupActionBar();
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -71,6 +76,16 @@ ActionBar.TabListener {
 					.setTabListener(this));
 		}
 	}
+	
+	/**
+	 * Set up the android.app.ActionBar, if the API is available.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setupActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
+	}
 
 	/*@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -81,13 +96,13 @@ ActionBar.TabListener {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		/*switch(item.getItemId()) {
-		case R.id.action_settings:
-			Intent intent = new Intent(this, ConnectActivity.class);
-			startActivity(intent);
-		}*/
-		return true;
-
+		switch(item.getItemId()) {
+		//up arrow to main
+		case android.R.id.home:
+			this.finish();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
