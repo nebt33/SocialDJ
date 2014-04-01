@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 
 /**
@@ -28,6 +30,7 @@ public class SongFragment extends Fragment {
         ListView lv = (ListView)rootView.findViewById(R.id.songListView);
         lv.setAdapter(new CustomSongAdapter(getActivity(), allSongs ));
          
+        
         return rootView;
     }
 	
@@ -39,6 +42,7 @@ public class SongFragment extends Fragment {
 			SongRow row = new SongRow();
 			row.setSongTitle(Integer.toString(i));
 			row.setArtistName(Integer.toString(i));
+			row.setSongDuration(Integer.toString(i));
 			allSongs.add(row);
 		}
 		return allSongs;
