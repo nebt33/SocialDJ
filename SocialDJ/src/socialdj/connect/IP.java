@@ -1,5 +1,11 @@
 package socialdj.connect;
 
+/**
+ * Instance of ip addresses and if application is currently connected 
+ * to an ip address.
+ * @author Nathan
+ *
+ */
 public class IP {
 	String address = null;
 	boolean selected = false;

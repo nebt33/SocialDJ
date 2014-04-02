@@ -15,8 +15,7 @@ import java.util.concurrent.Future;
 
 import socialdj.ConnectedSocket;
 
-import gen.socialdj.R;
-
+import com.example.slidingmenu.R;
 
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
@@ -37,6 +36,13 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * This class searches for any servers that is associated with this application.  
+ * The application will display any known servers.  The users will have the ability to
+ * connect to a server.  
+ * @author Nathan
+ *
+ */
 public class ConnectActivity extends Activity {
 
 	//standard port for socket
@@ -45,14 +51,15 @@ public class ConnectActivity extends Activity {
 	private static String nonActiveIp = "0.0.0.0";
 	//Adapter
 	private static MyAdapter myAdpt;
-	
-	//private RadioButton presentlyClicked = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connect_main);
 
+		//display nice message for user
+		Toast.makeText(getApplicationContext(), "Aviable Servers", Toast.LENGTH_LONG).show();
+		
 		ArrayList<IP> activeServers = findHosts();
 
 		ListView listView = (ListView)findViewById(R.id.listView);
