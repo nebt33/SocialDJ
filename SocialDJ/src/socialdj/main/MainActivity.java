@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import socialdj.ConnectedSocket;
 import socialdj.NavDrawerItem;
 import socialdj.NavDrawerListAdapter;
+import socialdj.config.R;
 import socialdj.connect.ConnectActivity;
 import socialdj.library.LibraryFragmentActivity;
 import socialdj.queue.QueueFragment;
 
-import com.example.slidingmenu.R;
 
 import android.support.v4.app.FragmentActivity;
 import android.app.FragmentManager;

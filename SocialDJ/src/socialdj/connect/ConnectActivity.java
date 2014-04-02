@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import socialdj.ConnectedSocket;
+import socialdj.config.R;
 
-import com.example.slidingmenu.R;
 
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
@@ -58,7 +58,7 @@ public class ConnectActivity extends Activity {
 		setContentView(R.layout.connect_main);
 
 		//display nice message for user
-		Toast.makeText(getApplicationContext(), "Aviable Servers", Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "Available Servers", Toast.LENGTH_LONG).show();
 		
 		ArrayList<IP> activeServers = findHosts();
 

@@ -1,6 +1,6 @@
 package socialdj.queue;
 
-import com.example.slidingmenu.R;
+import socialdj.config.R;
 
 import android.os.Bundle;
 import android.app.Fragment;
