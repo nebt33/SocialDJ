@@ -23,4 +23,6 @@ public class QueueFragment extends Fragment {
          
         return rootView;
     }
+	
+	//look into addFooterView for the fixed view at bottom of Q
 }

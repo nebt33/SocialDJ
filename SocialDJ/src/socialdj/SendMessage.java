@@ -5,13 +5,13 @@ import java.io.Serializable;
 
 /**
  * Message sender to server
- * Add song to Queue      - (add, song_title, artist_name)
- * Remove song from Queue - (remove, song_title, artist_name)
- * downVote               - (downVote, song_title, artist_name)
- * upVote                 - (upVote, song_title, artist_name)
- * Play music             - (play, empty String, empty String)
- * Pause music            - (pause, empty String, empty String)
- * Skip music             - (skip, empty String, empty String)
+ * Add song to Queue      - (add|song_title|artist_name)
+ * Remove song from Queue - (remove|song_title|artist_name)
+ * downVote               - (downVote|song_title|artist_name)
+ * upVote                 - (upVote|song_title|artist_name)
+ * Play music             - (play|empty String|empty String)
+ * Pause music            - (pause|empty String|empty String)
+ * Skip music             - (skip|empty String|empty String)
  * @author Nathan
  *
  */
@@ -36,5 +36,9 @@ public class SendMessage implements Serializable {
 	
 	public String getArtist(){
 		return artist;
+	}
+	
+	public String prepareMessage() {
+		return (operation + "|" + song + "|" + artist);
 	}
 }
