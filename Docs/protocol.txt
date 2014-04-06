@@ -7,6 +7,9 @@ server->client messages:
 		new_song|new song_id
 		song_info|song_id|metaitem|value
 		forget_song|delete song_id
+		new_album|new album_id
+		album_info|song_ids
+		forget_album|delete album_id
 	queue:
 		add_bottom|song_id
 		remove_top|song_id
@@ -18,7 +21,7 @@ server->client messages:
 client->server messages:
 	song database:
 		download_song|url
-		list_songs|[|metaitem|value]|sort_metaitem
+		list_songs|[|metaitem|value]|sort_metaitem|start|count
 		delete_song|song_id
 	queue:
 		queue_add|song_id
