@@ -1,0 +1,29 @@
+server protocol sketch
+server->client messages:
+	song database:
+		download_starting(new download_id)
+		download_fail(delete download_id)
+		download_success(delete download_id, new song_id)
+		new_song(new song_id)
+		song_info(song_id, metaitem, value)
+		forget_song(delete song_id)
+	queue:
+		add_bottom(song_id)
+		remove_top(song_id)
+		vote(user_id, song_id, value)
+	playback:
+		playing()
+		paused()
+		skip()
+client->server messages:
+	song database:
+		download_song(url)
+		list_songs([(metaitem, value)], sort_metaitem)
+		delete_song(song_id)
+	queue:
+		queue_add(song_id)
+	vote(song_id, value)
+	playback:
+	play()
+	pause()
+	skip()
