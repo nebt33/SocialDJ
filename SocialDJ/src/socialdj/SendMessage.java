@@ -1,44 +1,100 @@
 package socialdj;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 
 /**
  * Message sender to server
- * Add song to Queue      - (add|song_title|artist_name)
- * Remove song from Queue - (remove|song_title|artist_name)
- * downVote               - (downVote|song_title|artist_name)
- * upVote                 - (upVote|song_title|artist_name)
- * Play music             - (play|empty String|empty String)
- * Pause music            - (pause|empty String|empty String)
- * Skip music             - (skip|empty String|empty String)
+ * song database:
+		download_song|url
+		list_songs|[|metaitem|value]|start|count
+		list_albums|[|metaitem|value]|start|count
+		list_artists|[|metaitem|value]|start|count
+		delete_song|song_id
+	queue:
+		queue_add|song_id
+	vote|song_id|value   //value +1, -1
+	playback:
+	play
+	pause
+	skip
+	
+	metaitems are one of: artist, album, title
  * @author Nathan
  *
  */
-public class SendMessage implements Serializable {
-	private String operation;
-	private String song;
-	private String artist;
+public class SendMessage implements Runnable {
+	private String downloadSong = "download_song";
+	private String listSongs = "list_songs";
+	private String listAlbums = "list_albums";
+	private String listArtists = "list_artists";
+	private String deleteSong = "delete_song";
+	private String addSong = "queue_add";
+	private String vote = "vote";
+	private String play = "play";
+	private String pause = "pause";
+	private String skip = "skip";
+	private String message;
 	
-	public SendMessage(String operation, String song, String artist){
-		this.operation = operation;
-		this.song = song;
-		this.artist = artist;
+	public void prepareMessageDownloadSong(String url) {
+		message = (downloadSong + "|" + url);
 	}
 	
-	public String getOperation(){
-		return operation;
+	public void prepareMessageListSongs(ArrayList<MetaItem> metaItems, String start, String count) {
+		message = (listSongs + "|");
+		for(MetaItem m: metaItems)
+			message += (m.getMetaItem() + "|" + m.getValue() + "|");
+		message += (start + "|" + count);
 	}
 	
-	public String getSong(){
-		return song;
+	public void prepareMessageListAlbums(ArrayList<MetaItem> metaItems, String start, String count) {
+		message = (listAlbums + "|");
+		for(MetaItem m: metaItems)
+			message += (m.getMetaItem() + "|" + m.getValue() + "|");
+		message += (start + "|" + count);
 	}
 	
-	public String getArtist(){
-		return artist;
+	public void prepareMesssageListArtists(ArrayList<MetaItem> metaItems, String start, String count) {
+		message = (listArtists + "|");
+		for(MetaItem m: metaItems)
+			message += (m.getMetaItem() + "|" + m.getValue() + "|");
+		message += (start + "|" + count);
 	}
 	
-	public String prepareMessage() {
-		return (operation + "|" + song + "|" + artist);
+	public void prepareMessageDeleteSong(String id) {
+		message = (deleteSong + "|" + id);
+	}
+	
+	public void prepareMessageAddSong(String id) {
+		message = (addSong + "|" + id);
+	}
+	
+	public void prepareMessageVote(String id, String value) {
+		message = (vote + "|" + id + "|" + value);
+	}
+	
+	public void prepareMessagePlay() {
+		message = (play);
+	}
+	
+	public void prepareMessagePause() {
+		message = (pause);
+	}
+	
+	public void prepareMessageSkip() {
+		message = (skip);
+	}
+
+	@Override
+	public void run() {
+		PrintWriter out;
+		try {
+			out = new PrintWriter(ConnectedSocket.getSocket().getOutputStream());
+			out.write(message+"\n");
+			out.flush();
+		} catch (IOException e) {e.printStackTrace();}
 	}
 }

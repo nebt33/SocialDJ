@@ -26,9 +26,9 @@ public class ConnectedSocket {
 	  return ipAddress;
   }
   
-
   public static void close() {
-	  try {socket.close();
+	  try {
+		  socket.close();
 	} catch (IOException e) {e.printStackTrace();}
 
   }

@@ -4,15 +4,14 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
 import socialdj.ConnectedSocket;
+import socialdj.MessageHandler;
 import socialdj.NavDrawerItem;
 import socialdj.NavDrawerListAdapter;
 import socialdj.config.R;
 import socialdj.connect.ConnectActivity;
 import socialdj.library.LibraryFragmentActivity;
 import socialdj.queue.QueueFragment;
-
-
-import android.support.v4.app.FragmentActivity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,7 +20,7 @@ import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
@@ -67,7 +66,8 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        connectDifferentThread connect = new connectDifferentThread();
+        //connect to saved server on startup
+        ConnectTask connect = new ConnectTask();
 		SharedPreferences settings = getSharedPreferences("connected", MODE_PRIVATE);
 		connect.execute(settings.getString("currentlyConnected", nonActiveIp));
  
@@ -145,12 +145,6 @@ public class MainActivity extends FragmentActivity {
             displayView(position);
         }
     }
- 
-   /* @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }*/
  
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -249,7 +243,7 @@ public class MainActivity extends FragmentActivity {
 	 * Used to connect to previous server remembered by application if possible on create
 	 * @author Nathan
 	 */
-	public class connectDifferentThread extends AsyncTask<String, String, String> {
+	public class ConnectTask extends AsyncTask<String, String, String> {
 		boolean connected = false;
 		String ipAddress = nonActiveIp;
 		
@@ -282,8 +276,13 @@ public class MainActivity extends FragmentActivity {
 		
 		@Override
 		  protected void onPostExecute(String result) {
-		    if(connected)
-		    	Toast.makeText(getApplicationContext(), "Connected to Server: " + ipAddress, Toast.LENGTH_SHORT).show();
+			if(connected) {
+				Toast.makeText(getApplicationContext(), "Connected to Server: " + ipAddress, Toast.LENGTH_SHORT).show();
+
+				//call new handler for server
+				MessageHandler task = new MessageHandler();
+				new Thread(task).start();
+		    }
 		  }
 		
 	}

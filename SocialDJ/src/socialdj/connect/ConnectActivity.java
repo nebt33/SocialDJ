@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import socialdj.ConnectedSocket;
+import socialdj.MessageHandler;
 import socialdj.config.R;
 
 
@@ -161,10 +162,17 @@ public class ConnectActivity extends Activity {
 		return es.submit(new Callable<String>() {
 			@Override public String call() {
 				try {
-					Socket socket = new Socket();
-					socket.connect(new InetSocketAddress(ip, port), timeout);
-					socket.close();
-					return ip;
+					//to not close socket of current connected
+					System.out.println(ConnectedSocket.getConnectedIP());
+					System.out.println(ip);
+					if(ip.equalsIgnoreCase(ConnectedSocket.getConnectedIP()))
+						return ip;
+					else {
+						Socket socket = new Socket();
+						socket.connect(new InetSocketAddress(ip, port), timeout);
+						socket.close();
+						return ip;
+					}
 				} catch (Exception ex) {
 					return nonActiveIp; //default for not found
 				}
@@ -225,7 +233,7 @@ public class ConnectActivity extends Activity {
 						}
 						if (currentlyClicked == v)
 							return;
-						connectDifferentThread connect = new connectDifferentThread();
+						ConnectTask connect = new ConnectTask();
 						connect.execute(temp.getText().toString().trim());
 						
 						//if (currentlyClicked == v)
@@ -258,7 +266,7 @@ public class ConnectActivity extends Activity {
 					try {
 						holder.radio.setChecked(true);
 						currentlyClicked = holder.radio;
-						connectDifferentThread connect = new connectDifferentThread();
+						ConnectTask connect = new ConnectTask();
 						connect.execute(settings.getString("currentlyConnected", nonActiveIp));
 					} catch (Exception ex) {ex.printStackTrace();}
 				}
@@ -277,10 +285,11 @@ public class ConnectActivity extends Activity {
 		 * @author Nathan
 		 *
 		 */
-		public class connectDifferentThread extends AsyncTask<String, String, String> {
+		public class ConnectTask extends AsyncTask<String, String, String> {
 
 			boolean connected = false;
-			String ipAddress = nonActiveIp;
+			String previousIpAddress = nonActiveIp;
+			String currentIpAddress = nonActiveIp;
 			
 			@SuppressWarnings("static-access")
 			@Override
@@ -289,13 +298,16 @@ public class ConnectActivity extends Activity {
 				try {
 					if(!ConnectedSocket.getConnectedIP().equals(params[0])) {
 						if(ConnectedSocket.getSocket() != null) {
+							//set previous ip for new handler if changed
+							previousIpAddress = ConnectedSocket.getConnectedIP();
 							ConnectedSocket.close();
 						}	
+
 						//longer timeout because it takes an extra couple ms to close socket and try to reconnect
 						ConnectedSocket socket = new ConnectedSocket();
 						socket.connect(new InetSocketAddress(params[0], standardPort), 2000);
 						socket.setConnectedIP(params[0]);
-						ipAddress = params[0];
+						currentIpAddress = params[0];
 						connected = true;
 
 						//save state of which button was selected in internal storage to use when acitivty is called again
@@ -307,7 +319,7 @@ public class ConnectActivity extends Activity {
 					else {
 						//already connected does not need to reconnect and waste comp time
 						connected = true;
-						ipAddress = params[0];
+						currentIpAddress = params[0];
 					}
 				} catch (Exception ex) {
 					//server can't be connected to
@@ -321,8 +333,15 @@ public class ConnectActivity extends Activity {
 			 * Used to write to the gui on the same thread
 			 */
 			protected void onPostExecute(String result) {
-				if(connected) 
-					Toast.makeText(getApplicationContext(), "Connected to Server: " + ipAddress, Toast.LENGTH_SHORT).show();
+				if(connected) {
+					Toast.makeText(getApplicationContext(), "Connected to Server: " + currentIpAddress, Toast.LENGTH_SHORT).show();
+					//call new handler for new server
+					//change in ip
+					if(!currentIpAddress.equalsIgnoreCase(previousIpAddress) && (!previousIpAddress.equalsIgnoreCase(nonActiveIp))) {
+						MessageHandler task = new MessageHandler();
+						new Thread(task).start();
+					}
+				}
 				else 
 					Toast.makeText(getApplicationContext(), "Error Connecting to Server: ", Toast.LENGTH_SHORT).show();
 

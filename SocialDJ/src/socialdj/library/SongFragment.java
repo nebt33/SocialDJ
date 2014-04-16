@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import socialdj.ConnectedSocket;
+import socialdj.MessageHandler;
 import socialdj.SendMessage;
 import socialdj.config.R;
 import android.app.Activity;
@@ -50,7 +51,7 @@ public class SongFragment extends ListFragment {
 		super.onActivityCreated(savedInstanceState);
 
 		//Populate list
-		adapter = new CustomSongAdapter(getActivity(), R.layout.all_songs, new ArrayList<SongRow>());
+		adapter = new CustomSongAdapter(getActivity(), R.layout.all_songs, new ArrayList<Song>());
 
 		//asynchronously initial list
 		GetSongTask task = new GetSongTask();
@@ -116,7 +117,7 @@ public class SongFragment extends ListFragment {
 	 * Asynchronous call.  This class is responsible for calling the network for more songs
 	 * and managing the isLoading boolean.
 	 */
-	class GetSongTask extends AsyncTask<Integer, Void, List<SongRow>> {
+	class GetSongTask extends AsyncTask<Integer, Void, List<Song>> {
 		private static final int TOP_ITEM_INDEX = 2;
 
 		//position to scroll list to
@@ -128,8 +129,8 @@ public class SongFragment extends ListFragment {
 		}
 
 		@Override
-		protected List<SongRow> doInBackground(Integer... params) {
-			List<SongRow> results = new ArrayList<SongRow>();
+		protected List<Song> doInBackground(Integer... params) {
+			List<Song> results = new ArrayList<Song>();
 
 			if(params.length > TOP_ITEM_INDEX)
 				listTopPosition = params[TOP_ITEM_INDEX];
@@ -153,7 +154,7 @@ public class SongFragment extends ListFragment {
 						break;
 					List<String> temp = Arrays.asList(inputLine.split("\\|"));
 
-					SongRow row = new SongRow();
+					Song row = new Song();
 					row.setSongTitle(temp.get(0));
 					row.setArtistName(temp.get(1));
 					row.setSongDuration(temp.get(2));
@@ -165,9 +166,9 @@ public class SongFragment extends ListFragment {
 		}
 
 		@Override
-		protected void onPostExecute(List<SongRow> result) {
+		protected void onPostExecute(List<Song> result) {
 			adapter.setNotifyOnChange(true);
-			for(SongRow item: result) {
+			for(Song item: result) {
 				//check if item was added
 				synchronized(adapter) {
 					if(!adapter.contains(item)) {
@@ -191,20 +192,20 @@ public class SongFragment extends ListFragment {
 	 * @author Nathan
 	 *
 	 */
-	class CustomSongAdapter extends ArrayAdapter<SongRow> {
+	class CustomSongAdapter extends ArrayAdapter<Song> {
 		private final Activity context;
-		private final List<SongRow> items;
+		private final List<Song> items;
 		private final int rowViewId;
 
-		public CustomSongAdapter(Activity context, int rowViewId, List<SongRow> items) {
+		public CustomSongAdapter(Activity context, int rowViewId, List<Song> items) {
 			super(context, rowViewId, items);
 			this.context = context;
 			this.items = items;
 			this.rowViewId = rowViewId;
 		}
 
-		public boolean contains(SongRow item) {
-			for(SongRow r: items){
+		public boolean contains(Song item) {
+			for(Song r: items){
 				if(r.getSongTitle().equals(item.getSongTitle()) && r.getArtistName().equals(item.getArtistName())) {
 					return true;
 				}
@@ -212,7 +213,7 @@ public class SongFragment extends ListFragment {
 			return false;
 		}
 
-		public SongRow getItemAt(int index) {
+		public Song getItemAt(int index) {
 			return items.get(index);
 		}
 
@@ -244,21 +245,10 @@ public class SongFragment extends ListFragment {
 
 				@Override
 				public void onClick(View v) {
-					Thread thread = new Thread() {
-						@Override
-						public void run() {
-							SendMessage message = new SendMessage("add", getItem(currentlyClicked).getSongTitle(), getItem(currentlyClicked).getArtistName());
-							try {
-								PrintWriter out = new PrintWriter(ConnectedSocket.getSocket().getOutputStream());
-								out.write(message.prepareMessage()+"\n");
-								out.flush();
-							} catch (IOException e) {e.printStackTrace();}
-
-						}
-					};
-					thread.start();
-				}
-
+					SendMessage message = new SendMessage();
+					message.prepareMessageAddSong(getItem(currentlyClicked).getSongId());
+					new Thread(message).start();
+				} 
 			});
 
 			return rowView;
