@@ -16,7 +16,7 @@ server->client messages:
 	queue:
 		add_bottom|song_id
 		remove_top|song_id
-		vote|user_id|song_id|value
+		score|song_id|value
 	playback:
 		playing
 		paused
@@ -24,8 +24,9 @@ server->client messages:
 client->server messages:
 	song database:
 		download_song|url
-		list_songs|[|metaitem|value]|sort_metaitem|start|count
-		list_albums|[|metaitem|value]|sort_metaitem|start|count
+		list_songs|[|metaitem|value]|start|count
+		list_albums|[|metaitem|value]|start|count
+		list_artists|[|metaitem|value]|start|count
 		delete_song|song_id
 	queue:
 		queue_add|song_id
@@ -34,3 +35,4 @@ client->server messages:
 	play
 	pause
 	skip
+metaitems are one of: artist, album, title, duration
