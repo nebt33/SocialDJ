@@ -8,10 +8,10 @@ server->client messages:
 		song_info|song_id|metaitem|value
 		forget_song|delete song_id
 		new_album|new album_id
-		album_info|song_ids
+		album_info|album_id|name|song_ids
 		forget_album|delete album_id
 		new_artist|new artist_id
-		artist_info|name
+		artist_info|artist_id|name
 		forget_artist|delete artist_id
 	queue:
 		add_bottom|song_id
