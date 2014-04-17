@@ -5,7 +5,7 @@ server->client messages:
 		download_fail|delete download_id
 		download_success|delete download_id|new song_id
 		new_song|new song_id
-		song_info|song_id|metaitem|value
+		song_info|song_id|metaitem|value[|metaitem|value]
 		forget_song|delete song_id
 		new_album|new album_id
 		album_info|album_id|name|song_ids
