@@ -7,7 +7,7 @@ Makefile.generated: Server.pro
 
 Server.pro: *.cpp *.h
 	qmake-qt4 -project *.cpp *.h
-	qmake-qt4 -project "QT += network"
+	echo "QT += network" | tee -a Server.pro
 
 clean:
 	$(RM) Server.pro Makefile.generated *.o *.moc
