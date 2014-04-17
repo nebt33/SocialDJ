@@ -49,6 +49,18 @@ class Server: public QObject
 			QTcpSocket *client=listen_socket->nextPendingConnection();
 			client_sockets.push_back(client);
 			client->write("new_song|1\n");
+			client->write("new_artist|1\n");
+			client->write("artist_info|1|The Physics\n");
+			client->write("new_album|1\n");
+			client->write("album_info|1|High Society EP|1\n");
+			client->write("song_info|1|album|1|artist|1|duration|173.2\n");
+			client->write("add_bottom|1");
+			client->write("score|1|4");
+			client->write("new_song|2\n");
+			client->write("new_artist|2\n");
+			client->write("artist_info|2|Miami Horror\n");
+			client->write("song_info|2|artist|2|duration|251.1\n");
+			client->write("add_bottom|2");
 		}
 };
 
