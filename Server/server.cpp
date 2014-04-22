@@ -1,6 +1,10 @@
 #include <QtGui>
 #include <QtNetwork/QtNetwork>
+#include <QMessageBox>
+#include <QApplication>
 #include <unordered_set>
+#include <iostream>
+#include <functional>
 
 typedef struct
 {
@@ -139,6 +143,7 @@ int main(int argc, char** argv)
 	
 	auto s=new Server(&app);
 	//folders.add_folder_by_choosing();
+    std::cout<<"HERE"<<std::endl;
 	
 	app.exec();
 	return 0;
