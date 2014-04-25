@@ -1,5 +1,6 @@
 ifeq ($(shell uname -s), Linux)
 qt = -qt4
+RMF = rm -rf
 else
 unix = mingw32-
 RM = del
@@ -22,4 +23,4 @@ Server.pro: *.cpp *.h
 
 clean:
 	$(RM) Server.pro Makefile.generated *.o *.moc
-	$(RMF) /q release debug
+	$(RMF) release debug Server
