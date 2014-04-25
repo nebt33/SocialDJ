@@ -14,7 +14,7 @@ build: Makefile.generated
 	$(unix)make -f Makefile.generated
 
 Makefile.generated: Server.pro
-	qmake$(qt) -o Makefile.generated QMAKE_CXXFLAGS="-std=gnu++0x" QMAKE_LIBS=$(QMAKE_LIBS)
+	qmake$(qt) -o Makefile.generated QMAKE_CXXFLAGS="-std=gnu++0x -Wno-unused-parameter" QMAKE_LIBS=$(QMAKE_LIBS)
 
 Server.pro: *.cpp *.h
 	qmake$(qt) -project *.cpp *.h
