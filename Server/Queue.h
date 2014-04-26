@@ -10,9 +10,8 @@ struct Queue
 	{
 		int numVotes;
 		int submitterID;
-		Song* song;
+		const Song* song;
 		std::unordered_set<int> clientsVoted;
-		std::list<QueueObject> queue;
 		
 		QueueObject(int id, const Song *s)
 		{
@@ -22,6 +21,7 @@ struct Queue
 			clientsVoted.insert(id);
 		}
 	};
+	std::list<QueueObject> queue;
 
 	void insertSong(const Song *s, int submitterID);
 	void evaluateVote(bool increase, const Song *s, int submitterID);
