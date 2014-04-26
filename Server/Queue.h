@@ -1,24 +1,17 @@
 //Queue.h
+#include "item.h"
 
-
-
-typedef struct
+struct Queue
 {
-	class CompareSongs
-	{
-	    public:
-		    bool operator()(Song& song1, Song& song2)
-		    {
-			    if (song1.numVotes >= song2.numVotes) 
-					return true;
-				else
-					return false;
-			}
-	};
-
-	priority_queue<Song, vector<Song>, CompareSongs> queue;
+	list<Song> queue;
+	void insertSong(Song s);
 }
-Queue;
 
 
-void insertSong(Song
+void insertSong(Song s)
+{
+	
+	
+	
+
+}
