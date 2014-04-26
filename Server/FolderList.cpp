@@ -1,7 +1,7 @@
 #include "FolderList.h"
 #include <QFileDialog>
 #include <QWidget>
-#include <Qstring>
+#include <QString>
 #include <QTranslator>
 #include <QListView>
 #include <QTreeView>
