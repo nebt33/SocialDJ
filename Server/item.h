@@ -46,7 +46,5 @@ struct Song
 	id artist;
 	char* title=nullptr;
 	unsigned int duration=0;
-	int numVotes;
-	int submitterID;
 };
 #endif

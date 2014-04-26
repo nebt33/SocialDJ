@@ -3,15 +3,24 @@
 
 struct Queue
 {
-	list<Song> queue;
-	void insertSong(Song s);
-}
+	struct QueueObject
+	{
+		int numVotes;
+		int submitterID;
+		Song* song;
+		std::unordered_set<int> clientsVoted;
+		std::list<QueueObject> queue;
+		
+		QueueObject(int id, const Song *s)
+		{
+			song = s;
+			numVotes = 0;
+			submitterID = id;
+			clientsVoted.insert(id);
+		}
+	};
 
+	void insertSong(const Song *s, int submitterID);
+	void evaluateVote(bool increase, const Song *s, int submitterID);
+};
 
-void insertSong(Song s)
-{
-	
-	
-	
-
-}
