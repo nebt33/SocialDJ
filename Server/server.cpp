@@ -2,6 +2,10 @@
 #include <QtNetwork/QtNetwork>
 #include <QMessageBox>
 #include <QApplication>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QString>
+#include <QTranslator>
 #include <unordered_set>
 #include <iostream>
 #include <functional>
@@ -84,12 +88,18 @@ class Server: public QObject
 		Queue queue;
 		FolderList* folders;
 		Database* db;
+		QSystemTrayIcon *trayIcon;
+		QMenu *trayIconMenu;
+
 		Server(QObject* parent=nullptr)
 		{
 			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders=nullptr;
 			
 			setParent(parent);
+			createTrayIcon();
+			trayIcon->show();
+
 			quit=false;
 			clients=std::vector<Client*>();
 			listen_socket=new QTcpServer(this);
@@ -100,6 +110,22 @@ class Server: public QObject
 				quit=true;
 			}
 		}
+
+		void createTrayIcon()
+		{
+			 trayIconMenu = new QMenu();
+			 
+			 auto addDirectoriesAction = new QAction(tr("Add Directories"), this);
+			 connect(addDirectoriesAction, SIGNAL(triggered()), this, SLOT(addDirectories()));
+		
+			 trayIconMenu->addAction(addDirectoriesAction);
+			 //trayIconMenu->addSeparator();
+
+			 trayIcon = new QSystemTrayIcon(this);
+			 trayIcon->setContextMenu(trayIconMenu);
+
+			 trayIcon->setIcon(QIcon(":/images/icon.png"));
+		 }
 	public slots:
 		void song_updated(const Song* s)
 		{
@@ -220,6 +246,11 @@ class Server: public QObject
 			{}
 			#undef if_starts_with
 		}
+
+		void addDirectories()
+		{
+			std::cout<<"add directories triggered"<<std::endl;
+		}
 };
 
 int main(int argc, char** argv)
@@ -228,7 +259,6 @@ int main(int argc, char** argv)
 	
 	auto s=new Server(&app);
 	//folders.add_folder_by_choosing();
-	std::cout<<"HERE"<<std::endl;
 	
 	app.exec();
 	return 0;
