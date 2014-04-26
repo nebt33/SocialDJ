@@ -5,11 +5,10 @@
 #include <unordered_set>
 #include <iostream>
 #include <functional>
+#include <queue>
+#include <vector>
 
-typedef struct
-{
-}
-Queue;
+using namespace std;
 
 //the zero ID refers to a nonexistent object. Artist, Album, and Song IDs are in separate namespaces such that Song 1 and Album 1 have no a priori dependence.
 typedef unsigned int id;
@@ -42,13 +41,39 @@ Artist;
 
 typedef struct
 {
-	id get_album();//may be 0
-	id get_artist();//may be 0
-	const char* get_title();
-	unsigned int get_duration();//may be 0 if unknown, integer is in tenths of a second
-	id get_id();
+	id get_album(){ return albumID; };//may be 0
+	id get_artist(){ return artistID; };//may be 0
+	const char* get_title(){ return title; };
+	unsigned int get_duration(){ return duration; };//may be 0 if unknown, integer is in tenths of a second
+	id get_id(){ return songID; };
+	int numVotes;
+	int submitterID;
+	id songID;
+	id artistID;
+	id albumID;
+	const char* title;
+	int duration;
 }
 Song;
+
+typedef struct
+{
+	class CompareSongs
+	{
+	    public:
+		    bool operator()(Song& song1, Song& song2)
+		    {
+			    if (song1.numVotes >= song2.numVotes) 
+					return true;
+				else
+					return false;
+			}
+	};
+
+	priority_queue<Song, vector<Song>, CompareSongs> queue;
+}
+Queue;
+
 
 //the database will have its add_*, update_song, and delete_song methods called by the server whenever the FolderList sees a change in the set of songs on disk.
 //it will call updated_cb after a song and its album/artist have been updated, and will call deleted_cb after a song has been deleted.
@@ -99,6 +124,11 @@ class Server: public QObject
 				quit=true;
 			}
 		}
+
+		void processVote(Song newSong)
+		{
+			queue.queue.
+		}
 	public slots:
 		void new_song(Song* s)
 		{
@@ -134,6 +164,10 @@ class Server: public QObject
 		void client_message(Client* c)
 		{
 			//handle messages from clients
+			
+			//if message == queueVote
+			queue.queue.
+
 		}
 };
 
@@ -144,7 +178,11 @@ int main(int argc, char** argv)
 	auto s=new Server(&app);
 	//folders.add_folder_by_choosing();
     std::cout<<"HERE"<<std::endl;
-	
+
+
+	Queue queue;
+
+
 	app.exec();
 	return 0;
 	while(!s->quit)
@@ -176,7 +214,7 @@ int main(int argc, char** argv)
 						break;
 					case search_albums:
 						folders.search(message.query);
-						break;
+						break;					
 				}
 				break;
 		}*/
