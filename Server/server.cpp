@@ -110,7 +110,7 @@ struct Database
 };
 
 //the folderlist watches the filesystem and updates the database when it sees changes
-typedef struct
+struct
 {
 	void FolderList(Database&){};
 	void add_folders_by_choosing();
