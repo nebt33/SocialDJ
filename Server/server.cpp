@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <iostream>
 #include <functional>
+#include <assert.h>
 
 typedef struct
 {
@@ -57,6 +58,13 @@ typedef struct
 	{
 		//TODO: send song messages
 		songs.insert(s.get_id());
+		"song_info|%d"
+		"|duration|%d"
+		"|artist|%d"
+		"|album|%d"
+		"|title|%s"
+		"\n";
+		//socket->write();
 	}
 
 	bool knows_album(id b)
@@ -67,6 +75,7 @@ typedef struct
 	void send_album(const Album& b)
 	{
 		//TODO: send album messages
+		"album_info|%d|%s|%d,%d,%d...\n";
 		albums.insert(b.get_id());
 	}
 
@@ -78,6 +87,7 @@ typedef struct
 	void send_artist(const Artist& a)
 	{
 		//TODO: send artist messages
+		"artist_info|%d|%s\n";
 		artists.insert(a.get_id());
 	}
 }
@@ -144,10 +154,51 @@ class Server: public QObject
 		void song_updated(const Song* s)
 		{
 			//add the song to the database; send the song to all quiescent clients
+			const Artist* a
+			#ifdef HAVE_IMPL
+			=db->find_artist(s->get_artist())
+			#endif
+			;
+			const Album* b
+			#ifdef HAVE_IMPL
+			=db->find_album(s->get_album())
+			#endif
+			;
+			
+			assert(s && a && b);
+			
+			auto new_song_msg=QString("").sprintf("new_song|%d\n", s->get_id()).toUtf8();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				if(!clients[i]->knows_artist(a->get_id()))
+				{
+					clients[i]->send_artist(*a);
+				}
+				if(!clients[i]->knows_album(b->get_id()))
+				{
+					clients[i]->send_album(*b);
+				}
+				if(!clients[i]->knows_song(s->get_id()))
+				{
+					clients[i]->socket->write(new_song_msg);
+				}
+				clients[i]->send_song(*s);
+			}
 		}
 		void song_deleted(id s)
 		{
 			//send the notification to all quiescent clients
+			auto msg=QString("").sprintf("forget_song|%d\n", s).toUtf8();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				if(clients[i]->knows_song(s))
+				{
+					clients[i]->socket->write(msg);
+					clients[i]->songs.erase(s);
+				}
+			}
 		}
 		void quit_cb()
 		{
