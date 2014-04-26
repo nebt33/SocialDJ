@@ -7,39 +7,14 @@
 #include <functional>
 #include <assert.h>
 
+#include "item.h"
+#include "Database.h"
+#include "FolderList.h"
+
 typedef struct
 {
 }
 Queue;
-
-//the zero ID refers to a nonexistent object. Artist, Album, and Song IDs are in separate namespaces such that Song 1 and Album 1 have no a priori dependence.
-typedef unsigned int id;
-
-typedef struct
-{
-	const char* get_name() const;//may be NULL, e.g. if the album title is unknown
-	unsigned int get_n_tracks() const;//returns how many tracks the album has; if we don't have all tracks on the album this would be the highest known track number
-	const id* get_tracks() const;//returns an array of track IDs, with 0s in the spots where no track is known
-	id get_id() const;
-}
-Album;
-
-typedef struct
-{
-	const char* get_name() const;
-	id get_id() const;
-}
-Artist;
-
-typedef struct
-{
-	id get_album() const;//may be 0
-	id get_artist() const;//may be 0
-	const char* get_title() const;
-	unsigned int get_duration() const;//may be 0 if unknown, integer is in tenths of a second
-	id get_id() const;
-}
-Song;
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
 typedef struct
@@ -92,31 +67,6 @@ typedef struct
 	}
 }
 Client;
-
-//the database will have its add_*, update_song, and delete_song methods called by the server whenever the FolderList sees a change in the set of songs on disk.
-//it will call updated_cb after a song and its album/artist have been updated, and will call deleted_cb after a song has been deleted.
-struct Database
-{
-	Database(std::function<void(const Song*)> updated_cb, std::function<void(id)> deleted_cb);//functions to call when a song is updated or deleted
-	const Song* find_song(id n);//may be NULL
-	const Album* find_album(id n);//may be NULL
-	const Artist* find_artist(id n);//may be NULL
-	void delete_song(id n);
-	const char* get_song_data(id n);//may be NULL, returns the file data for playback... maybe this should return a FILE* or other readable interface?
-	id add_album(const char* title);//creates the album if it doesn't exist, and returns the id for an album with that title
-	id add_artist(const char* name);//creates the artist if it doesn't exist, and returns the id for an artist with that name
-	id add_song();//creates a new song with no info
-	void update_song(id n, const char* title, id artist, id album, unsigned int album_index, unsigned int duration);//fill in song info, maybe replacing old info
-};
-
-//the folderlist watches the filesystem and updates the database when it sees changes
-struct
-{
-	void FolderList(Database&){};
-	void add_folders_by_choosing();
-	void add_folder_by_path(const char* path);
-}
-FolderList;
 
 id parse_id(const QString& s)
 {
