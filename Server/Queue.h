@@ -1,5 +1,8 @@
 //Queue.h
 #include "item.h"
+#include "string"
+#include "unordered_set"
+#include "list"
 
 struct Queue
 {
