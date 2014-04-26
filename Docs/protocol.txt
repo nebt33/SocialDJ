@@ -8,7 +8,7 @@ server->client messages:
 		song_info|song_id|metaitem|value[|metaitem|value]
 		forget_song|delete song_id
 		new_album|new album_id
-		album_info|album_id|name|song_ids
+		album_info|album_id|name|artist_id|song_ids
 		forget_album|delete album_id
 		new_artist|new artist_id
 		artist_info|artist_id|name
