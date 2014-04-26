@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QString>
 #include <QTranslator>
+#include <QWidget>
 #include <unordered_set>
 #include <iostream>
 #include <functional>
@@ -94,7 +95,7 @@ class Server: public QObject
 		Server(QObject* parent=nullptr)
 		{
 			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
-			folders=nullptr;
+			folders= nullptr;// new FolderList(*db);
 			
 			setParent(parent);
 			createTrayIcon();
@@ -249,7 +250,7 @@ class Server: public QObject
 
 		void addDirectories()
 		{
-			std::cout<<"add directories triggered"<<std::endl;
+			FolderList::add_folders_by_choosing((QWidget*)trayIconMenu);
 		}
 };
 
