@@ -11,6 +11,7 @@
 #include <iostream>
 #include <functional>
 #include <assert.h>
+#include <QtMultimedia/QMediaPlayer>
 
 #include "item.h"
 #include "Database.h"
@@ -91,6 +92,7 @@ class Server: public QObject
 		Database* db;
 		QSystemTrayIcon *trayIcon;
 		QMenu *trayIconMenu;
+	    QMediaPlayer *player;
 
 		Server(QObject* parent=nullptr)
 		{
@@ -99,6 +101,11 @@ class Server: public QObject
 			
 			folders->initFolderList();
 			
+			std::cout << "HELLLO" << std::endl;
+			player = new QMediaPlayer(0);
+			//player->setMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
+			//player->play();
+	
 			setParent(parent);
 			createTrayIcon();
 			trayIcon->show();

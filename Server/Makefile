@@ -19,6 +19,8 @@ Makefile.generated: Server.pro
 Server.pro: *.cpp *.h
 	qmake$(qt) -project *.cpp *.h
 	echo QT += network widgets >> Server.pro
+	echo CONFIG += mobility >> Server.pro
+	echo MOBILITY += multimedia >> Server.pro
 	echo LFLAGS += -Wl,-subsystem,console >> Server.pro
 
 clean:
