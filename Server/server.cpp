@@ -95,7 +95,9 @@ class Server: public QObject
 		Server(QObject* parent=nullptr)
 		{
 			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
-			folders= nullptr;// new FolderList(*db);
+			folders = new FolderList();
+			
+			folders->initFolderList();
 			
 			setParent(parent);
 			createTrayIcon();
@@ -118,9 +120,14 @@ class Server: public QObject
 			 
 			 auto addDirectoriesAction = new QAction(tr("Add Directories"), this);
 			 connect(addDirectoriesAction, SIGNAL(triggered()), this, SLOT(addDirectories()));
+			 
+			 auto quitAction = new QAction(tr("Exit"), this);
+			 connect(quitAction, SIGNAL(triggered()), this, SLOT(quit_cb()));
 		
 			 trayIconMenu->addAction(addDirectoriesAction);
-			 //trayIconMenu->addSeparator();
+			 trayIconMenu->addSeparator();
+			 trayIconMenu->addAction(quitAction);
+			 
 
 			 trayIcon = new QSystemTrayIcon(this);
 			 trayIcon->setContextMenu(trayIconMenu);
@@ -179,7 +186,8 @@ class Server: public QObject
 		}
 		void quit_cb()
 		{
-			quit=true;
+			//quit=true;
+			QCoreApplication::quit();
 		}
 		void client_connected_cb()
 		{
@@ -250,8 +258,9 @@ class Server: public QObject
 
 		void addDirectories()
 		{
-			FolderList::add_folders_by_choosing((QWidget*)trayIconMenu);
+			folders->add_folders_by_choosing((QWidget*)trayIconMenu);
 		}
+		
 };
 
 int main(int argc, char** argv)
@@ -260,7 +269,6 @@ int main(int argc, char** argv)
 	
 	auto s=new Server(&app);
 	//folders.add_folder_by_choosing();
-	
 	app.exec();
 	return 0;
 	while(!s->quit)
