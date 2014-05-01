@@ -15,6 +15,15 @@ struct Album
 	const id* get_tracks() const {return this->tracks.data();};//returns an array of track IDs, with 0s in the spots where no track is known
 	id get_id() const {return this->bid;};
 	
+	void set_id_at(unsigned int at, id which)
+	{
+		if(tracks.size() < at+1)
+		{
+			tracks.resize(at+1, 0);
+		}
+		tracks[at]=which;
+	}
+	
 	id bid;
 	char* name=nullptr;
 	std::vector<id> tracks;
