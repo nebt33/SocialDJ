@@ -25,8 +25,8 @@ client->server messages:
 	song database:
 		download_song|url
 		list_songs|start|count|[|metaitem|value]
-		list_albums|start|count|[|metaitem|value]
-		list_artists|start|count|[|metaitem|value]
+		list_albums|start|count|query
+		list_artists|start|count|query
 		delete_song|song_id
 	queue:
 		queue_add|song_id

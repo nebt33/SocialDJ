@@ -33,6 +33,20 @@ cmp_class(SongTitle,Song,title);
 cmp_class(ArtistName,Artist,name);
 cmp_class(AlbumName,Album,name);
 
+enum MetaItem
+{
+	ARTIST,
+	ALBUM,
+	TITLE,
+	DURATION,
+};
+
+struct ItemFilter
+{
+	enum MetaItem field;
+	const char* value;
+};
+
 //the database will have its add_*, update_song, and delete_song methods called by the server whenever the FolderList sees a change in the set of songs on disk.
 //it will call updated_cb after a song and its album/artist have been updated, and will call deleted_cb after a song has been deleted.
 struct Database
@@ -132,6 +146,58 @@ struct Database
 		}
 		updated_cb(s);
 	};
+	
+	std::vector<Song*> list_songs(std::vector<ItemFilter>& filt, int start, int length)
+	{
+		std::vector<Song*> results;
+		for(auto i=song_ids.begin(); i!=song_ids.end(); ++i)
+		{
+			auto song=std::get<1>(*i);
+			auto matches=true;
+			unsigned int j;
+			for(j=0; j<filt.size(); j++)
+			{
+				switch(filt[j].field)
+				{
+					case ARTIST:
+						//TODO: nyi
+						matches&=false;
+						break;
+					case ALBUM:
+						//TODO: nyi
+						matches&=false;
+						break;
+					case TITLE:
+						matches&=song->title && !!strcasestr(song->title, filt[j].value);
+						break;
+					case DURATION:
+						//TODO: nyi
+						matches&=false;
+						break;
+				}
+				if(!matches)
+					break;
+			}
+			if(matches)
+				results.push_back(song);
+		}
+		return results;
+	}
+
+#define list_simple(Type,name,field) std::vector<Type*> list_##name##s(const char* query, int start, int length)\
+{\
+	std::vector<Type*> results;\
+	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
+	{\
+		auto value=std::get<1>(*i);\
+		if(!!strcasestr(value->field, query))\
+			results.push_back(value);\
+	}\
+	return results;\
+}\
+
+	list_simple(Album,album,name)
+	list_simple(Artist,artist,name)
 	
 	std::unordered_map<id,Song*> song_ids;
 	std::map<Song*,bool,SongTitle> songs;
