@@ -5,16 +5,16 @@ else
 unix = mingw32-
 RM = del
 RMF = del /q
-QMAKE_LIBS="-Wl,-subsystem,console"
+QMAKE_CXXFLAGS="-I../id3lib-3.8.3/include"
+QMAKE_LIBS="-Wl,-subsystem,console ./libid3.a ./libz.a" 
 endif
-
 
 build: Makefile.generated
 	moc$(qt) server.cpp -o server.moc
 	$(unix)make -f Makefile.generated
 
 Makefile.generated: Server.pro
-	qmake$(qt) -o Makefile.generated QMAKE_CXXFLAGS="-std=gnu++0x -Wno-unused-parameter" QMAKE_LIBS=$(QMAKE_LIBS)
+	qmake$(qt) -o Makefile.generated QMAKE_CXXFLAGS="$(QMAKE_CXXFLAGS) -std=gnu++0x -Wno-unused-parameter" QMAKE_LIBS=$(QMAKE_LIBS)
 
 Server.pro: *.cpp *.h
 	$(RM) qrc_resources.cpp qrc_resources.o

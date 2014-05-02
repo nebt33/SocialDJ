@@ -13,6 +13,8 @@
 #include <QIODevice>
 #include <QMessageBox>
 #include <queue>
+#define ID3LIB_LINKOPTION 1
+#include <id3/tag.h>
 
 //TODO: remove parent parameter if this is the way we do it
 void FolderList::add_folders_by_choosing(QWidget* parent)
@@ -85,7 +87,15 @@ void FolderList::initFolderList()
 				{
 					if(files[i].endsWith(".mp3"))
 					{
+						//qDebug() << files[i];
 						//get id3 info and add song to database
+						ID3_Tag tag(files[i].toUtf8().constData());
+						ID3_Frame* frame = tag.Find(ID3FID_ALBUM);
+						if( NULL != frame )
+						{
+							ID3_Field* field = frame->GetField(ID3FN_TEXT);
+							qDebug() << "album: "<<field->GetRawText();
+						}
 					}
 				}
 			}
