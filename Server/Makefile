@@ -1,16 +1,18 @@
 ifeq ($(shell uname -s), Linux)
 qt = -qt5
 RMF = rm -rf
-QMAKE_LIBS="-lid3 -lz" 
+QMAKE_LIBS="-lid3 -lz"
 else
 unix = mingw32-
 RM = del
 RMF = del /q
 QMAKE_CXXFLAGS="-I../id3lib-3.8.3/include"
-QMAKE_LIBS="-Wl,-subsystem,console ./libid3.a ./libz.a" 
+QMAKE_LIBS="-Wl,-subsystem,console ./libid3.a ./libz.a"
+kill_server=taskkill /f /im Server.exe
 endif
 
 build: Makefile.generated
+	$(kill_server)
 	moc$(qt) server.cpp -o server.moc
 	$(unix)make -f Makefile.generated
 
