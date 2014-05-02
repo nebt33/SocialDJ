@@ -84,7 +84,7 @@ class Server: public QObject
 		bool quit;
 		std::vector<Client*> clients;
 		QTcpServer* listen_socket;
-		Queue queue;
+		Queue *queue;
 		FolderList* folders;
 		Database* db;
 		QSystemTrayIcon *trayIcon;
@@ -95,9 +95,10 @@ class Server: public QObject
 		{
 			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders = new FolderList();
-			
+			queue = new Queue;
 			folders->initFolderList();
-			player = new Player();
+			
+			player = new Player(queue);
 			
 			setParent(parent);
 			createTrayIcon();
