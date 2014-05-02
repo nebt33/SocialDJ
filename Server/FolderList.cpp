@@ -37,10 +37,6 @@ void FolderList::add_folders_by_choosing(QWidget* parent)
 	
 	if( dialog.exec() )
 	{
-		QFile file("C:/Users/Jacob/Documents/rolla/cs397/SocialDJ/folders.txt");
-		file.open(QIODevice::WriteOnly | QIODevice::Text);
-		QTextStream out(&file);
-		
 		QStringList dirs = dialog.selectedFiles();
 		QStringList::const_iterator it;
 		for (it = dirs.begin(); it != dirs.end(); it++)
@@ -60,20 +56,18 @@ void FolderList::add_folders_by_choosing(QWidget* parent)
 					queue.push(data.absoluteFilePath());
 				}
 			}
-			//TODO: move file writing to some onQuit() method when the dialog quitting is fixed
 			for(int i = 0; i < results.size(); i++)
 			{
-				out<<results[i]<<"\n";
+				fileWatcher.addPath(results[i]);
 			}
 		}
-		file.close();
 		QMessageBox::information(0, QString("Social DJ"), QString("Done Adding Folders"));
 	}
 }
 
 void FolderList::initFolderList()
 {
-	QFile file("C:/Users/Jacob/Documents/rolla/cs397/SocialDJ/folders.txt");
+	QFile file("../../folders.txt");
 	if( file.open(QIODevice::ReadOnly) )
 	{
 		QTextStream in(&file);
@@ -140,8 +134,18 @@ void FolderList::initFolderList()
 							song = files[i].toUtf8().constData();
 						}
 						
-						id artistId = db->add_artist(artist);
-						id albumId = db->add_album(album);
+						id artistId;
+						if(artist != NULL )
+							artistId = db->add_artist(artist);
+						else
+							artistId = 0;
+							
+						id albumId;
+						if(album != NULL )
+							albumId = db->add_artist(album);
+						else
+							albumId = 0;
+							
 						id newId = db->add_song();
 						db->update_song(newId, song, artistId, albumId, index, duration);
 					}
@@ -151,4 +155,18 @@ void FolderList::initFolderList()
 
 		file.close();
 	}
+}
+
+void FolderList::writeFolders()
+{
+	QFile file("../../folders.txt");
+	file.open(QIODevice::WriteOnly | QIODevice::Text);
+	QTextStream out(&file);
+	
+	QStringList dirs = fileWatcher.directories();
+	for(int i = 0; i < dirs.size(); i++)
+	{
+		out<<dirs[i]<<"\n";
+	}
+	file.close();
 }

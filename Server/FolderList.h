@@ -11,6 +11,8 @@ struct FolderList
 	void add_folder_by_path(const char* path);
 	void initFolderList();
 	
+	//write
+	void writeFolders();
 	
 	FileWatcher fileWatcher;
 	Database* db;

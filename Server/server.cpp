@@ -278,6 +278,7 @@ class Server: public QObject
 		}
 		void quit_cb()
 		{
+			folders->writeFolders();
 			QCoreApplication::quit();
 		}
 		void client_connected_cb()
