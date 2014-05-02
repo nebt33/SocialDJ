@@ -1,6 +1,8 @@
 #ifndef SONG_H
 #define SONG_H
 #include <vector>
+#include <stdlib.h>
+#include <string.h>
 
 //the zero ID refers to a nonexistent object. Artist, Album, and Song IDs are in separate namespaces such that Song 1 and Album 1 have no a priori dependence.
 typedef unsigned int id;
