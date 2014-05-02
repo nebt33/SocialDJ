@@ -195,7 +195,7 @@ std::vector<ItemFilter> parse_filters(const QStringList& args, unsigned int* sta
 		++it;
 		if(it == args.constEnd())
 			break;
-		ItemFilter a={m, (*it).toUtf8().constData()};
+		ItemFilter a={m, (*it).toUtf8()};
 		filters.push_back(a);
 	}
 	return filters;
