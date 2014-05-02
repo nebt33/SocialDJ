@@ -54,7 +54,7 @@ struct Queue : public QObject
 			{
 				if(queue.size() > 0)
 				{
-				    currentlyPlaying = queue.pop_front();
+				    //currentlyPlaying = queue.pop_front();
 				}
 			}
 		}
