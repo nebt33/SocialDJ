@@ -4,7 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <map>
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 #include <assert.h>
 
@@ -194,6 +194,7 @@ struct Database
 	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
 	{\
 		auto value=std::get<1>(*i);\
+		printf("checking %s for %s\n", value->field, query);\
 		if(!!strstr(value->field, query))\
 			results.push_back(value);\
 	}\

@@ -124,14 +124,17 @@ void FolderList::initFolderList()
 							{
 								ID3_Field* field = frame->GetField(ID3FN_TEXT);
 								const char* temp = field->GetRawText();
-								sscanf(temp, "%d/",&index);
+								if(temp) sscanf(temp, "%d/",&index);
 							}
 							qDebug() << "index: "<<index;
 							qDebug() << "\n";
 						}
 						if(song == NULL)
 						{
+							printf("ugh\n");
 							song = files[i].toUtf8().constData();
+							printf("ugh %s\n", files[i].toUtf8().constData());
+							printf("ugh %s\n", song);
 						}
 						
 						id artistId;

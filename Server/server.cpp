@@ -44,18 +44,18 @@ struct Client : QObject
 	void send_song(const Song& s)
 	{
 		if(knows_song(s.get_id())) return;
-		auto new_song_msg=QString("new_song|%d\n").arg(s.get_id());
+		auto new_song_msg=QString("new_song|%1\n").arg(s.get_id());
 		socket->write(new_song_msg.toUtf8());
 		songs.insert(s.get_id());
 	}
 	void send_song_info(const Song& s)
 	{
 		/*
-		"song_info|%d"
-		"|duration|%d"
-		"|artist|%d"
-		"|album|%d"
-		"|title|%s"
+		"song_info|%1"
+		"|duration|%2"
+		"|artist|%3"
+		"|album|%4"
+		"|title|%5"
 		"\n";
 		*/
 	}
@@ -68,13 +68,13 @@ struct Client : QObject
 	void send_album(const Album& b)
 	{
 		if(knows_album(b.get_id())) return;
-		auto album_message=QString("new_album|%d\n").arg(b.get_id());
+		auto album_message=QString("new_album|%1\n").arg(b.get_id());
 		socket->write(album_message.toUtf8());
-		auto info_message=QString("album_info|%d|%s|").arg(b.get_id()).arg(b.name);
+		auto info_message=QString("album_info|%1|%2|").arg(b.get_id()).arg(b.name);
 			unsigned int i;
 			for(i=0; i<b.get_n_tracks(); i++)
 			{
-				info_message+=QString("%d,").arg(b.get_tracks()[i]);
+				info_message+=QString("%1,").arg(b.get_tracks()[i]);
 			}
 			info_message+="\n";
 		socket->write(info_message.toUtf8());
@@ -89,9 +89,9 @@ struct Client : QObject
 	void send_artist(const Artist& a)
 	{
 		if(knows_artist(a.get_id())) return;
-		auto artist_message=QString("new_artist|%d\n").arg(a.get_id());
+		auto artist_message=QString("new_artist|%1\n").arg(a.get_id());
 		socket->write(artist_message.toUtf8());
-		auto info_message=QString("artist_info|%d|%s\n").arg(a.get_id()).arg(a.name);
+		auto info_message=QString("artist_info|%1|%2\n").arg(a.get_id()).arg(a.name);
 		socket->write(info_message.toUtf8());
 		artists.insert(a.get_id());
 	}
@@ -259,19 +259,25 @@ class Server: public QObject
 			const Artist* a=db->find_artist(s->get_artist());
 			const Album* b=db->find_album(s->get_album());
 			
-			assert(s && a && b);
+			assert(s);
 			
-			auto new_song_msg=QString("new_song|%d\n").arg(s->get_id());
+			auto new_song_msg=QString("new_song|%1\n").arg(s->get_id());
 			unsigned int i;
 			for(i=0; i<clients.size(); i++)
 			{
-				if(!clients[i]->knows_artist(a->get_id()))
+				if(a)
 				{
-					clients[i]->send_artist(*a);
+					if(!clients[i]->knows_artist(a->get_id()))
+					{
+						clients[i]->send_artist(*a);
+					}
 				}
-				if(!clients[i]->knows_album(b->get_id()))
+				if(b)
 				{
-					clients[i]->send_album(*b);
+					if(!clients[i]->knows_album(b->get_id()))
+					{
+						clients[i]->send_album(*b);
+					}
 				}
 				if(!clients[i]->knows_song(s->get_id()))
 				{
@@ -283,7 +289,7 @@ class Server: public QObject
 		void song_deleted(id s)
 		{
 			//send the notification to all quiescent clients
-			auto msg=QString("").sprintf("forget_song|%d\n", s).toUtf8();
+			auto msg=QString("forget_song|%1\n").arg(s).toUtf8();
 			unsigned int i;
 			for(i=0; i<clients.size(); i++)
 			{
@@ -312,6 +318,7 @@ class Server: public QObject
 			unsigned int i;\
 			for(i=0; i<matches.size(); i++)\
 			{\
+				printf("sending %s\n", #foo);\
 				send_##foo##_with_deps(c, matches[i], db);\
 			}
 		
@@ -337,7 +344,7 @@ class Server: public QObject
 		{
 			//handle messages from clients
 			auto args=line.split ('|', QString::KeepEmptyParts);
-			#define dispatch(message) if(args[0] == #message) { message(c, args); } else
+			#define dispatch(message) if(args[0] == #message) { printf("got " #message "\n");message(c, args); } else
 			dispatch(delete_song)
 			dispatch(list_songs)
 			dispatch(list_albums)
