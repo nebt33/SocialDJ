@@ -2,9 +2,10 @@
 /* http://qt-project.org/doc/qt-5/audiooverview.html */
 
 #include <QMediaPlaylist>
+#include "Queue.h"
 
 
-struct Player: public QObject
+struct Player : public QObject
 {	
 	private:
 		Q_OBJECT
@@ -12,11 +13,9 @@ struct Player: public QObject
 	public:
 		QMediaPlayer *player;
 		QMediaPlaylist *playlist;
-		const Queue *queue
 		
-		Player(Queue *queueRef)
+		Player(Queue *queue)
 		{
-			queue = queueRef;
 			player = new QMediaPlayer(0);
 			
 			playlist = new QMediaPlaylist(0);
@@ -35,10 +34,7 @@ struct Player: public QObject
 			//Song playing has ended, pop top song of queue and set currentlyPlaying
 			if(status == 8)
 			{
-				if(queue.size() > 0)
-				{
-				    currentlyPlaying = pop_front();
-				}
+
 			}
 		}
 };

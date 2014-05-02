@@ -16,7 +16,7 @@
 #include "item.h"
 #include "Database.h"
 #include "FolderList.h"
-#include "Queue.h"
+
 #include "Player.h"
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything

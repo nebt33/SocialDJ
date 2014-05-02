@@ -49,6 +49,7 @@ struct Queue : public QObject
 	public slots:
 		void mediaStatusChanged(QMediaPlayer::MediaStatus status)
 		{
+					std::cout << "THE SIG WORKED " << status <<  std::endl;
 			//Song playing has ended, pop top song of queue and set currentlyPlaying
 			if(status == 8)
 			{
