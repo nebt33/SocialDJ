@@ -97,7 +97,8 @@ class Server: public QObject
 			folders = new FolderList();
 			
 			folders->initFolderList();
-	
+			player = new Player();
+			
 			setParent(parent);
 			createTrayIcon();
 			trayIcon->show();
