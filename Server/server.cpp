@@ -20,12 +20,21 @@
 #include "Player.h"
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
-typedef struct
+struct Client : QObject
 {
+	private:
+		Q_OBJECT
+	public:
+	std::function<void(Client* c, const QString& args)> handle_message;
 	std::unordered_set<id> songs;
 	std::unordered_set<id> albums;
 	std::unordered_set<id> artists;
 	QTcpSocket* socket;
+	
+	Client(std::function<void(Client* c, const QString& args)> handler)
+	{
+		handle_message=handler;
+	}
 	
 	bool knows_song(id s)
 	{
@@ -86,8 +95,16 @@ typedef struct
 		socket->write(info_message.toUtf8());
 		artists.insert(a.get_id());
 	}
-}
-Client;
+
+	public slots:
+	void read_lines()
+	{
+		while(socket->canReadLine())
+		{
+			handle_message(this, socket->readLine());
+		}
+	}
+};
 
 void send_song_with_deps(Client* c, Song* s, Database* db)
 {
@@ -203,7 +220,7 @@ class Server: public QObject
 			setParent(parent);
 			createTrayIcon();
 			trayIcon->show();
-
+			
 			quit=false;
 			clients=std::vector<Client*>();
 			listen_socket=new QTcpServer(this);
@@ -214,7 +231,7 @@ class Server: public QObject
 				quit=true;
 			}
 		}
-
+		
 		void createTrayIcon()
 		{
 			 trayIconMenu = new QMenu();
@@ -282,38 +299,6 @@ class Server: public QObject
 			folders->writeFolders();
 			QCoreApplication::quit();
 		}
-		void client_connected_cb()
-		{
-			printf("called\n");
-			auto c=new Client();
-			c->socket=listen_socket->nextPendingConnection();
-			clients.push_back(c);
-			
-			
-			c->socket->connect(c->socket, SIGNAL(readyRead()), this, SLOT(client_read_cb));
-			auto socket=c->socket;
-			socket->write("new_song|1\n");
-			socket->write("new_artist|1\n");
-			socket->write("artist_info|1|The Physics\n");
-			socket->write("new_album|1\n");
-			socket->write("album_info|1|High Society EP|1\n");
-			socket->write("song_info|1|album|1|artist|1|duration|173.2\n");
-			socket->write("song_info|1|title|The Session\n");
-			socket->write("add_bottom|1\n");
-			socket->write("score|1|4\n");
-			socket->write("new_song|2\n");
-			socket->write("new_artist|2\n");
-			socket->write("artist_info|2|Miami Horror\n");
-			socket->write("song_info|2|artist|2|duration|251.1|title|Sometimes\n");
-			socket->write("add_bottom|2\n");
-		}
-		void client_read_cb(Client* c)
-		{
-			while(c->socket->canReadLine())
-			{
-				client_message(c, c->socket->readLine());
-			}
-		}
 		
 		void download_song(Client* c, const QStringList& args)
 		{
@@ -359,6 +344,32 @@ class Server: public QObject
 			dispatch(list_artists)
 			{}
 			#undef dispatch
+		}
+		
+		void client_connected_cb()
+		{
+			printf("called\n");
+			auto c=new Client([&](Client* c, const QString& args){this->client_message(c, args);});
+			c->socket=listen_socket->nextPendingConnection();
+			clients.push_back(c);
+			
+			
+			c->socket->connect(c->socket, SIGNAL(readyRead()), c, SLOT(read_lines()));
+			auto socket=c->socket;
+			socket->write("new_song|1\n");
+			socket->write("new_artist|1\n");
+			socket->write("artist_info|1|The Physics\n");
+			socket->write("new_album|1\n");
+			socket->write("album_info|1|High Society EP|1\n");
+			socket->write("song_info|1|album|1|artist|1|duration|173.2\n");
+			socket->write("song_info|1|title|The Session\n");
+			socket->write("add_bottom|1\n");
+			socket->write("score|1|4\n");
+			socket->write("new_song|2\n");
+			socket->write("new_artist|2\n");
+			socket->write("artist_info|2|Miami Horror\n");
+			socket->write("song_info|2|artist|2|duration|251.1|title|Sometimes\n");
+			socket->write("add_bottom|2\n");
 		}
 		
 		void addDirectories()
