@@ -40,12 +40,12 @@ struct Database
 	std::function<void(const Song*)> updated_cb;
 	std::function<void(id)> deleted_cb;
 	Database(std::function<void(const Song*)> updated_cb, std::function<void(id)> deleted_cb);//functions to call when a song is updated or deleted
-
+	
 		#define lookup(in)\
 			auto it=in.find(n);\
 			if(it == in.end()) return NULL;\
 			return std::get<1>(*it);
-
+	
 	Song* find_song(id n) const { lookup(song_ids) };//may be NULL
 	Album* find_album(id n) const { lookup(album_ids) };//may be NULL
 	const Artist* find_artist(id n) const { lookup(artist_ids) };//may be NULL
@@ -54,7 +54,7 @@ struct Database
 		auto sit=song_ids.find(n);
 		assert(sit != song_ids.end());
 		auto s=std::get<1>(*sit);
-
+		
 		auto ait=album_ids.find(s->get_album());
 		if(ait != album_ids.end())
 		{
@@ -107,14 +107,29 @@ struct Database
 	};
 	
 	//fill in song info, maybe replacing old info
-	void update_song(id n, const char* title, id artist, id album, unsigned int album_index, unsigned int duration)
+	void update_song(id which, const char* title, id artist, id album, unsigned int album_index, unsigned int duration)
 	{
-		Song* s=find_song(n);
-		if(!s) {
+		Song* s=find_song(which);
+		if(!s)
+		{
 			assert(0 && "updating nonexistent song!");
 			return;
 		}
 		
+		if(s->title)
+		{
+			delete s->title;
+			s->title=nullptr;
+		}
+		s->title=strdup(title);
+		s->artist=artist;
+		s->album=album;
+		
+		Album* b=find_album(s->album);
+		if(b)
+		{
+			b->set_id_at(album_index, which);
+		}
 		updated_cb(s);
 	};
 	
