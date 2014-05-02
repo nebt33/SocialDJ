@@ -195,7 +195,7 @@ class Server: public QObject
 			folders = new FolderList(*db);
 
 			folders->initFolderList();
-			
+			queue = new Queue;
 			player = new Player(queue);
 			
 			setParent(parent);
