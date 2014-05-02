@@ -8,7 +8,7 @@ RM = del
 RMF = del /q
 QMAKE_CXXFLAGS="-I../id3lib-3.8.3/include"
 QMAKE_LIBS="-Wl,-subsystem,console ./libid3.a ./libz.a"
-kill_server=taskkill /f /im Server.exe
+kill_server=taskkill /f /im Server.exe || cd .
 endif
 
 build: Makefile.generated

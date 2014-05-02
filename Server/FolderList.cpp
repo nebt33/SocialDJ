@@ -16,6 +16,11 @@
 #define ID3LIB_LINKOPTION 1
 #include <id3/tag.h>
 
+FolderList::FolderList(Database& thedb)
+{
+	db = &thedb;
+}
+
 //TODO: remove parent parameter if this is the way we do it
 void FolderList::add_folders_by_choosing(QWidget* parent)
 {
@@ -33,7 +38,6 @@ void FolderList::add_folders_by_choosing(QWidget* parent)
 	if( dialog.exec() )
 	{
 		QFile file("C:/Users/Jacob/Documents/rolla/cs397/SocialDJ/folders.txt");
-		qDebug() <<"opening file";
 		file.open(QIODevice::WriteOnly | QIODevice::Text);
 		QTextStream out(&file);
 		
@@ -87,19 +91,59 @@ void FolderList::initFolderList()
 				{
 					if(files[i].endsWith(".mp3"))
 					{
-						//qDebug() << files[i];
+						const char* song = NULL;
+						const char* album = NULL;
+						const char* artist = NULL;
+						unsigned int index = 0;
+						unsigned int duration = 0;
 						//get id3 info and add song to database
-						ID3_Tag tag(files[i].toUtf8().constData());
-						ID3_Frame* frame = tag.Find(ID3FID_ALBUM);
-						if( NULL != frame )
+						ID3_Tag tag((dir->absolutePath() + "/" + files[i]).toUtf8().constData());
+						if(tag.NumFrames() > 0)
 						{
-							ID3_Field* field = frame->GetField(ID3FN_TEXT);
-							qDebug() << "album: "<<field->GetRawText();
+							//get song title
+							ID3_Frame* frame = tag.Find(ID3FID_TITLE);
+							if( NULL != frame)
+							{
+								ID3_Field* field = frame->GetField(ID3FN_TEXT);
+								song = field->GetRawText();
+							}
+							qDebug() << "title: "<<song;
+							//get album name
+							frame = tag.Find(ID3FID_ALBUM);
+							if( NULL != frame)
+							{
+								ID3_Field* field = frame->GetField(ID3FN_TEXT);
+								album = field->GetRawText();
+							}
+							qDebug() << "album: "<<album;
+							//get artist name
+							frame = tag.Find(ID3FID_LEADARTIST);
+							if( NULL != frame)
+							{
+								ID3_Field* field = frame->GetField(ID3FN_TEXT);
+								artist = field->GetRawText();
+							}
+							qDebug() << "artist: "<<artist;
+							//get song index on album
+							frame = tag.Find(ID3FID_TRACKNUM);
+							if( NULL != frame)
+							{
+								ID3_Field* field = frame->GetField(ID3FN_TEXT);
+								const char* temp = field->GetRawText();
+								sscanf(temp, "%d/",&index);
+							}
+							qDebug() << "index: "<<index;
+							qDebug() << "\n";
 						}
-						else
+						if(song == NULL)
 						{
-							qDebug() << "null frame";
+							song = files[i].toUtf8().constData();
 						}
+						
+						//id artistId = db->add_artist(artist);
+						//id albumId = db->add_album(album);
+						//id newId = db->add_song();
+						//db->update_song(newId, song, artistId, albumId, index, duration);
 					}
 				}
 			}

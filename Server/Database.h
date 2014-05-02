@@ -4,7 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <map>
-#include <cstring>
+#include <string.h>
 #include <algorithm>
 #include <assert.h>
 
@@ -172,7 +172,7 @@ struct Database
 						matches&=false;
 						break;
 					case TITLE:
-						matches&=song->title && !!strcasestr(song->title, filt[j].value);
+						matches&=song->title && !!strstr(song->title, filt[j].value);
 						break;
 					case DURATION:
 						//TODO: nyi
@@ -194,7 +194,7 @@ struct Database
 	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
 	{\
 		auto value=std::get<1>(*i);\
-		if(!!strcasestr(value->field, query))\
+		if(!!strstr(value->field, query))\
 			results.push_back(value);\
 	}\
 	return results;\
