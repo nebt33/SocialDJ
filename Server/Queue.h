@@ -13,11 +13,12 @@
 #include <QString>
 #include <QTranslator>
 #include <QWidget>
-#include <unordered_set>
 #include <iostream>
 #include <functional>
 #include <assert.h>
 #include <QtMultimedia/QMediaPlayer>
+#include "Player.h"
+
 
 struct Queue : public QObject
 {
@@ -41,6 +42,17 @@ struct Queue : public QObject
 		};
 		std::list<QueueObject> queue;
 		
+		Queue(Player *player)
+		{
+			player->playlist->connect(player->player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
+			player->playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/12 Elevator.mp3"));
+			player->playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
+			player->playlist->setPlaybackMode(QMediaPlaylist::Sequential);
+			player->player->setPlaylist(player->playlist);
+
+			player->player->play();
+		}
+		
 		const Song* currentlyPlaying;
 		
 		void insertSong(const Song *s, int submitterID);
@@ -49,16 +61,18 @@ struct Queue : public QObject
 	public slots:
 		void mediaStatusChanged(QMediaPlayer::MediaStatus status)
 		{
-					std::cout << "THE SIG WORKED " << status <<  std::endl;
+			std::cout << "THE SIG WORKED " << status <<  std::endl;
 			//Song playing has ended, pop top song of queue and set currentlyPlaying
 			if(status == 8)
 			{
 				if(queue.size() > 0)
 				{
-				    //currentlyPlaying = queue.pop_front();
+					currentlyPlaying = queue.front().song;
+					queue.pop_front();
+
 				}
 			}
-		}
-	
+		}	
 };
+
 
