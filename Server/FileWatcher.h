@@ -6,6 +6,4 @@ class FileWatcher : public QFileSystemWatcher
 		Q_OBJECT
 	
 	public:
-	signals:
-		void directoryChanged(const QString &path);
 };

@@ -7,6 +7,10 @@
 #include <cstring>
 #include <algorithm>
 #include <assert.h>
+#define ID3LIB_LINKOPTION 1
+#include <id3/tag.h>
+#include <QString>
+#include <QDebug>
 
 #define cmp_class(Name,Type,field) struct Name\
 {\
@@ -64,6 +68,76 @@ struct Database
 			auto it=in.find(n);\
 			if(it == in.end()) return NULL;\
 			return std::get<1>(*it);
+			
+	static void addSongFromPath(QString path, Database& db)
+	{
+		if(path.endsWith(".mp3"))
+		{
+			const char* song = NULL;
+			const char* album = NULL;
+			const char* artist = NULL;
+			unsigned int index = 0;
+			unsigned int duration = 0;
+			//get id3 info and add song to database
+			ID3_Tag tag(path.toUtf8().constData());
+			if(tag.NumFrames() > 0)
+			{
+				//get song title
+				ID3_Frame* frame = tag.Find(ID3FID_TITLE);
+				if( NULL != frame)
+				{
+					ID3_Field* field = frame->GetField(ID3FN_TEXT);
+					song = field->GetRawText();
+				}
+				qDebug() << "title: "<<song;
+				//get album name
+				frame = tag.Find(ID3FID_ALBUM);
+				if( NULL != frame)
+				{
+					ID3_Field* field = frame->GetField(ID3FN_TEXT);
+					album = field->GetRawText();
+				}
+				qDebug() << "album: "<<album;
+				//get artist name
+				frame = tag.Find(ID3FID_LEADARTIST);
+				if( NULL != frame)
+				{
+					ID3_Field* field = frame->GetField(ID3FN_TEXT);
+					artist = field->GetRawText();
+				}
+				qDebug() << "artist: "<<artist;
+				//get song index on album
+				frame = tag.Find(ID3FID_TRACKNUM);
+				if( NULL != frame)
+				{
+					ID3_Field* field = frame->GetField(ID3FN_TEXT);
+					const char* temp = field->GetRawText();
+					sscanf(temp, "%d/",&index);
+				}
+				qDebug() << "index: "<<index;
+				qDebug() << "\n";
+			}
+			if(song == NULL)
+			{
+				song = path.toUtf8().constData();
+			}
+			
+			id artistId;
+			if(artist != NULL )
+				artistId = db.add_artist(artist);
+			else
+				artistId = 0;
+				
+			id albumId;
+			if(album != NULL )
+				albumId = db.add_artist(album);
+			else
+				albumId = 0;
+				
+			id newId = db.add_song();
+			db.update_song(newId, song, artistId, albumId, index, duration);
+		}
+	}
 	
 	Song* find_song(id n) const { lookup(song_ids) };//may be NULL
 	Album* find_album(id n) const { lookup(album_ids) };//may be NULL
