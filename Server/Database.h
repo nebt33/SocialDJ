@@ -53,7 +53,11 @@ struct Database
 {
 	std::function<void(const Song*)> updated_cb;
 	std::function<void(id)> deleted_cb;
-	Database(std::function<void(const Song*)> updated_cb, std::function<void(id)> deleted_cb);//functions to call when a song is updated or deleted
+	Database(std::function<void(const Song*)> updated, std::function<void(id)> deleted)
+	{
+		this->updated_cb=updated;
+		this->deleted_cb=deleted;
+	};//functions to call when a song is updated or deleted
 	
 		#define lookup(in)\
 			auto it=in.find(n);\

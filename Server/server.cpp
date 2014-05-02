@@ -191,7 +191,7 @@ class Server: public QObject
 		
 		Server(QObject* parent=nullptr)
 		{
-			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
+			db=new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders = new FolderList();
 			
 			folders->initFolderList();
