@@ -17,6 +17,7 @@
 #include "Database.h"
 #include "FolderList.h"
 #include "Queue.h"
+#include "Player.h"
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
 typedef struct
@@ -88,18 +89,14 @@ class Server: public QObject
 		Database* db;
 		QSystemTrayIcon *trayIcon;
 		QMenu *trayIconMenu;
-	    QMediaPlayer *player;
-
+		Player *player;
+		
 		Server(QObject* parent=nullptr)
 		{
 			db=nullptr;//new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders = new FolderList();
 			
 			folders->initFolderList();
-			
-			player = new QMediaPlayer(0);
-			//player->setMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
-			//player->play();
 	
 			setParent(parent);
 			createTrayIcon();
