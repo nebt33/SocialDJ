@@ -16,7 +16,7 @@
 #include "item.h"
 #include "Database.h"
 #include "FolderList.h"
-#include "Queue.h"
+
 #include "Player.h"
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
@@ -182,7 +182,7 @@ class Server: public QObject
 		bool quit;
 		std::vector<Client*> clients;
 		QTcpServer* listen_socket;
-		Queue queue;
+		Queue *queue;
 		FolderList* folders;
 		Database* db;
 		QSystemTrayIcon *trayIcon;
@@ -195,9 +195,10 @@ class Server: public QObject
 			
 			db=new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders = new FolderList(*db);
-			
+
 			folders->initFolderList();
-			player = new Player();
+			queue = new Queue;
+			player = new Player(queue);
 			
 			setParent(parent);
 			createTrayIcon();
