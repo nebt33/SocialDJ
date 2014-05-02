@@ -17,10 +17,6 @@
 #include "Database.h"
 #include "FolderList.h"
 
-typedef struct
-{
-}
-Queue;
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
 typedef struct
@@ -101,7 +97,6 @@ class Server: public QObject
 			
 			folders->initFolderList();
 			
-			std::cout << "HELLLO" << std::endl;
 			player = new QMediaPlayer(0);
 			//player->setMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
 			//player->play();

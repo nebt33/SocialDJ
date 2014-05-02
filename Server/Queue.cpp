@@ -1,6 +1,18 @@
 #include "Queue.h"
 #include <assert.h>
 
+//CLIENT STILL NEEDS A SUBMITTER ID
+
+
+//Sort function for the queue, highest votes moved to the front of the queue
+bool compareVotes(Queue::QueueObject &first, Queue::QueueObject &second)
+{
+    if(first.numVotes >= second.numVotes)
+        return true;
+    else
+		return false;
+}
+
 void Queue::insertSong(const Song *s, int submitterID)
 {
 	bool exists;
@@ -11,24 +23,10 @@ void Queue::insertSong(const Song *s, int submitterID)
 	  if(it->song == s)
 	      exists = true;
 	}
-	if(!exists)
+	if(!exists && s != currentlyPlaying)
 	{
-		bool inserted = false;
-		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
-		{
-			if(queue.size() == 0)
-			{
-				queue.push_front(newSong);
-				inserted = true;
-			}
-			if(it->numVotes == 0 || it->numVotes < 0)
-			{		
-				queue.insert(it, newSong);
-				inserted = true;
-			}
-		}
-		if(!inserted)
-			queue.push_back(newSong);
+	    queue.push_front(newSong);
+	    queue.sort(compareVotes);
 	}
 	else
 	{
@@ -36,8 +34,10 @@ void Queue::insertSong(const Song *s, int submitterID)
 	}
 }
 
-void Queue::evaluateVote(bool increase, const Song *s, int submitterID)
+
+int Queue::evaluateVote(int increase, const Song *s, int submitterID)
 {
+	int score = 0;
 	QueueObject* currentSong = nullptr;
 	for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
 	{
@@ -50,19 +50,23 @@ void Queue::evaluateVote(bool increase, const Song *s, int submitterID)
 	//See if the submitter of this vote has voted for this song already
     std::unordered_set<int>::const_iterator got = currentSong->clientsVoted.find(submitterID);
 	
-	if(got != currentSong->clientsVoted.end())
+	if(got != currentSong->clientsVoted.end() && currentSong->song != currentlyPlaying)
 	{
 		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
 		{
 			if(it->song == currentSong->song)
 			{
-			    if(increase)
+			    if(increase == 1)
 				    it->numVotes++;
 			    else
 				    it->numVotes--;
 				
+				queue.sort(compareVotes);
+				score = it->numVotes;
 				currentSong->clientsVoted.insert(submitterID);
 			}
 		}
 	}
+	
+	return score;
 }

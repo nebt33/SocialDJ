@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unordered_set>
 #include <list>
+#include <cctype>
 
 struct Queue
 {
@@ -22,8 +23,10 @@ struct Queue
 		}
 	};
 	std::list<QueueObject> queue;
-
+	
+	const Song* currentlyPlaying;
+	
 	void insertSong(const Song *s, int submitterID);
-	void evaluateVote(bool increase, const Song *s, int submitterID);
+	int evaluateVote(int increase, const Song *s, int submitterID);
 };
 
