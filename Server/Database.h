@@ -60,6 +60,7 @@ struct Database
 	};//functions to call when a song is updated or deleted
 	
 		#define lookup(in)\
+			if(n == 0) return NULL;\
 			auto it=in.find(n);\
 			if(it == in.end()) return NULL;\
 			return std::get<1>(*it);
@@ -101,10 +102,11 @@ struct Database
 	};
 	
 	//creates the album if it doesn't exist, and returns the id for an album with that title
-	id add_album(const char* title)
+	id add_album(const char* name)
 	{
 		++album_id;
-		album_ids[album_id]=new Album(album_id, title?strdup(title):nullptr);
+		album_ids[album_id]=new Album(album_id, name?strdup(name):nullptr);
+		albums[album_ids[album_id]]=true;
 		return album_id;
 	};
 	
@@ -113,14 +115,17 @@ struct Database
 	{
 		++artist_id;
 		artist_ids[artist_id]=new Artist(artist_id, name?strdup(name):nullptr);
-		return song_id;
+		artists[artist_ids[artist_id]]=true;
+		return artist_id;
 	};
 	
 	//creates a new song with no info
 	id add_song()
 	{
 		++song_id;
+		printf("added song %u\n", song_id);
 		song_ids[song_id]=new Song(song_id, 0, 0, nullptr);
+		songs[song_ids[song_id]]=true;
 		return song_id;
 	};
 	
@@ -153,14 +158,17 @@ struct Database
 	
 	std::vector<Song*> list_songs(std::vector<ItemFilter>& filt, int start, int length)
 	{
+		printf("called list_songs\n");
 		std::vector<Song*> results;
 		for(auto i=song_ids.begin(); i!=song_ids.end(); ++i)
 		{
 			auto song=std::get<1>(*i);
+			printf("song %s\n", song->title);
 			auto matches=true;
 			unsigned int j;
 			for(j=0; j<filt.size(); j++)
 			{
+				printf("checking %s\n", filt[j].value);
 				switch(filt[j].field)
 				{
 					case ARTIST:
@@ -199,7 +207,7 @@ struct Database
 			results.push_back(value);\
 	}\
 	return results;\
-}\
+}
 
 	list_simple(Album,album,name)
 	list_simple(Artist,artist,name)

@@ -152,7 +152,7 @@ void FolderList::scanDirs(QStringList dirs)
 					{
 						ID3_Field* field = frame->GetField(ID3FN_TEXT);
 						const char* temp = field->GetRawText();
-						sscanf(temp, "%d/",&index);
+						if (temp) sscanf(temp, "%d/",&index);
 					}
 					qDebug() << "index: "<<index;
 					qDebug() << "\n";
@@ -170,7 +170,7 @@ void FolderList::scanDirs(QStringList dirs)
 					
 				id albumId;
 				if(album != NULL )
-					albumId = db->add_artist(album);
+					albumId = db->add_album(album);
 				else
 					albumId = 0;
 					
