@@ -140,10 +140,10 @@ void FolderList::initFolderList()
 							song = files[i].toUtf8().constData();
 						}
 						
-						//id artistId = db->add_artist(artist);
-						//id albumId = db->add_album(album);
-						//id newId = db->add_song();
-						//db->update_song(newId, song, artistId, albumId, index, duration);
+						id artistId = db->add_artist(artist);
+						id albumId = db->add_album(album);
+						id newId = db->add_song();
+						db->update_song(newId, song, artistId, albumId, index, duration);
 					}
 				}
 			}
