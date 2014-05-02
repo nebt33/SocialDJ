@@ -1,6 +1,7 @@
 ifeq ($(shell uname -s), Linux)
 qt = -qt5
 RMF = rm -rf
+QMAKE_LIBS="-lid3 -lz" 
 else
 unix = mingw32-
 RM = del
