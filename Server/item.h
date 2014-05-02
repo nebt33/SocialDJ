@@ -1,13 +1,16 @@
 #ifndef SONG_H
 #define SONG_H
 #include <vector>
+#include <stdlib.h>
+#include <string.h>
 
 //the zero ID refers to a nonexistent object. Artist, Album, and Song IDs are in separate namespaces such that Song 1 and Album 1 have no a priori dependence.
 typedef unsigned int id;
 
 struct Album
 {
-	Album(id b, const char* name);
+	Album(id b, const char* album_name){bid=b; name=strdup(album_name);};
+	~Album() {free(name);}
 	void add_track(id t){};
 
 	const char* get_name() const {return this->name;};//may be NULL, e.g. if the album title is unknown
@@ -31,7 +34,8 @@ struct Album
 
 struct Artist
 {
-	Artist(id a, const char* name);
+	Artist(id a, const char* artist_name){aid=a; name=strdup(artist_name);};
+	~Artist() {free(name);}
 	const char* get_name() const {return this->name;};
 	id get_id() const {return this->aid;};
 	
@@ -41,7 +45,8 @@ struct Artist
 
 struct Song
 {
-	Song(id s, id album, id artist, char* title);
+	Song(id s, id album_id, id artist_id, char* song_title){sid=s; album=album_id; artist=artist_id; title=strdup(song_title);};
+	~Song(){free(title);}
 	void set_duration(unsigned int tenths){this->duration = tenths;}
 	
 	id get_album() const {return this->album;};//may be 0
