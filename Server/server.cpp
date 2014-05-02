@@ -191,6 +191,8 @@ class Server: public QObject
 		
 		Server(QObject* parent=nullptr)
 		{
+			QApplication::setQuitOnLastWindowClosed(false);
+			
 			db=new Database([&](const Song* s){this->song_updated(s);}, [&](id s){this->song_deleted(s);});
 			folders = new FolderList(*db);
 			
@@ -216,7 +218,7 @@ class Server: public QObject
 		{
 			 trayIconMenu = new QMenu();
 			 
-			 auto addDirectoriesAction = new QAction(tr("Add Directories"), this);
+			 auto addDirectoriesAction = new QAction(tr("Select Directories"), this);
 			 connect(addDirectoriesAction, SIGNAL(triggered()), this, SLOT(addDirectories()));
 			 
 			 auto quitAction = new QAction(tr("Exit"), this);
@@ -276,7 +278,6 @@ class Server: public QObject
 		}
 		void quit_cb()
 		{
-			//quit=true;
 			QCoreApplication::quit();
 		}
 		void client_connected_cb()
