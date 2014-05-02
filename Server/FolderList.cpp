@@ -96,6 +96,10 @@ void FolderList::initFolderList()
 							ID3_Field* field = frame->GetField(ID3FN_TEXT);
 							qDebug() << "album: "<<field->GetRawText();
 						}
+						else
+						{
+							qDebug() << "null frame";
+						}
 					}
 				}
 			}
