@@ -154,7 +154,7 @@ static void addSongFromPath(QString path, Database& db)
 			theId = db.add_song();
 		//else
 		
-		printf("update_song(%u, %s, %u, %u, %u, %u);\n", newId, song, artistId, albumId, index, duration);
+		printf("update_song(%u, %s, %u, %u, %u, %u);\n", theId, song, artistId, albumId, index, duration);
 		db.update_song(theId, song, artistId, albumId, index, duration);
 	}
 }
