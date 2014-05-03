@@ -12,7 +12,7 @@ bool compareVotes(Queue::QueueObject &first, Queue::QueueObject &second)
 		return false;
 }
 
-void Queue::insertSong(const Song *s, int submitterID)
+void Queue::insertSong(const Song *s, client_id submitterID)
 {
 	bool exists = false;
 	QueueObject newSong = QueueObject(submitterID, s);
@@ -43,7 +43,7 @@ void Queue::insertSong(const Song *s, int submitterID)
 }
 
 
-int Queue::evaluateVote(int increase, const Song *s, int submitterID)
+int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 {
 	int score = 0;
 	QueueObject* currentSong = nullptr;
@@ -81,3 +81,17 @@ int Queue::evaluateVote(int increase, const Song *s, int submitterID)
 	
 	return score;
 }
+
+
+void Queue::removeSong(const Song *s)
+{
+	//Checks if the song is already in the queue, if so remove it
+	for(std::list<QueueObject>::iterator it = this->queue.begin(); it != this->queue.end(); it++)
+	{
+	  if(it->song == s)
+	      queue.erase(it);
+	}
+}
+		
+		
+		

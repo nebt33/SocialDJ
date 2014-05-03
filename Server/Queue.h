@@ -28,11 +28,11 @@ struct Queue : public QObject
 		struct QueueObject
 		{
 			int numVotes;
-			int submitterID;
+			client_id submitterID;
 			const Song* song;
-			std::unordered_set<int> clientsVoted;
+			std::unordered_set<client_id> clientsVoted;
 			
-			QueueObject(int id, const Song *s)
+			QueueObject(client_id id, const Song *s)
 			{
 				song = s;
 				numVotes = 0;
@@ -46,8 +46,9 @@ struct Queue : public QObject
 		const Song* currentlyPlaying;				
 				
 		
-		void insertSong(const Song *s, int submitterID);
-		int evaluateVote(int increase, const Song *s, int submitterID);
+		void insertSong(const Song *s, client_id submitterID);
+		void removeSong(const Song *s);
+		int evaluateVote(int increase, const Song *s, client_id submitterID);
 				
 		Queue(Player *player)
 		{
