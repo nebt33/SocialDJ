@@ -228,14 +228,8 @@ class Server: public QObject
 			folders = new FolderList(*db);
 			
 			folders->initFolderList();
-<<<<<<< HEAD
 			player = new Player();
 			queue = new Queue(player);
-
-=======
-			queue = new Queue();
-			player = new Player(queue);
->>>>>>> 583c7bba4b8b11d17837bd3ba97d51a5a0b76d9e
 			
 			setParent(parent);
 			createTrayIcon();

@@ -1,4 +1,4 @@
-//Queue.h
+///Queue.h
 #include "item.h"
 #include <string.h>
 #include <unordered_set>
@@ -39,21 +39,39 @@ struct Queue : public QObject
 				submitterID = id;
 				clientsVoted.insert(id);
 			}
-		};
-		std::list<QueueObject> queue;
+		};		
 		
+		std::list<QueueObject> queue;
+		Player *connectedPlayer;
+		const Song* currentlyPlaying;				
+					
 		Queue(Player *player)
 		{
-			player->playlist->connect(player->player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
-			player->playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/12 Elevator.mp3"));
-			player->playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
-			player->playlist->setPlaybackMode(QMediaPlaylist::Sequential);
-			player->player->setPlaylist(player->playlist);
+			//Connect the queue to the player so that the queue knows when a song ends
+			connectedPlayer = player;
+			connectedPlayer->playlist->connect(player->player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
 
-			player->player->play();
+			
+			//test songs
+			Song *song1 = new Song(0,0,0,"1");
+			song1->path = "C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/i can break these cuffs.mp3";
+			Song *song2 = new Song(0,0,0,"2");
+			song2->path = "C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/12 Elevator.mp3";
+			Song *song3 = new Song(0,0,0,"3");
+			song3->path = "C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3";
+			
+			QueueObject q1 = QueueObject(1, song1);
+			QueueObject q2 = QueueObject(2, song2);
+			QueueObject q3 = QueueObject(3, song3);
+			
+			queue.push_back(q1);
+			queue.push_back(q2);
+			queue.push_back(q3);
+			
+			connectedPlayer->next();
+			connectedPlayer->next();
 		}
-		
-		const Song* currentlyPlaying;
+	
 		
 		void insertSong(const Song *s, int submitterID);
 		int evaluateVote(int increase, const Song *s, int submitterID);
@@ -62,14 +80,14 @@ struct Queue : public QObject
 		void mediaStatusChanged(QMediaPlayer::MediaStatus status)
 		{
 			std::cout << "THE SIG WORKED " << status <<  std::endl;
-			//Song playing has ended, pop top song of queue and set currentlyPlaying
-			if(status == 8)
+			//Song playing has ended or song has been skipped, pop top song of queue and set currentlyPlaying
+			if(status == 7 || status == 1)
 			{
 				if(queue.size() > 0)
 				{
 					currentlyPlaying = queue.front().song;
 					queue.pop_front();
-
+					connectedPlayer->newSong(currentlyPlaying);
 				}
 			}
 		}	

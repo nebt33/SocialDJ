@@ -3,6 +3,8 @@
 
 #include <QMediaPlaylist>
 #include <QtMultimedia/QMediaPlayer>
+#include <iostream>
+#include "item.h"
 
 struct Player : public QObject
 {	
@@ -16,14 +18,19 @@ struct Player : public QObject
 		Player()
 		{
 			player = new QMediaPlayer(0);
-			
 			playlist = new QMediaPlaylist(0);
+			
+			playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
+			playlist->setPlaybackMode(QMediaPlaylist::Sequential);
+			player->setPlaylist(playlist);
+
+			player->play();
 		}	  
 		
-	public slots:
-		//void newTop(Song *newTop)
-		///{
-		 // std::cout << "IN THE NEWTOP" << std::endl;
-		//}
+		//Called by the queue when a new song is moved to the top of the queue
+		void newSong(const Song *song);
+		void next();
+		void Play();
+		void pause();
 };
 
