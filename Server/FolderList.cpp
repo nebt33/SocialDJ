@@ -12,6 +12,7 @@
 #include <QTextStream>
 #include <QIODevice>
 #include <QMessageBox>
+#include <QStandardPaths>
 #include <queue>
 
 FolderList::FolderList(Database& thedb)
@@ -142,7 +143,26 @@ static void addSongFromPath(QString path, Database& db)
 
 void FolderList::initFolderList()
 {
-	QFile file("../../folders.txt");
+	QStringList configs = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation);
+	if(configs.size() > 0)
+	{
+		foldersPath = configs[0];
+		QDir dir(foldersPath);
+		if(!dir.exists())
+		{
+			dir.mkpath(foldersPath);
+			qDebug()<<"making folders dir";
+		}
+		foldersPath += "/folders.txt";
+	}
+	else
+		foldersPath = "../../";
+	
+	
+	
+	qDebug()<<foldersPath;
+	
+	QFile file(foldersPath);
 	if( file.open(QIODevice::ReadOnly) )
 	{
 		QTextStream in(&file);
@@ -165,7 +185,7 @@ void FolderList::initFolderList()
 
 void FolderList::writeFolders()
 {
-	QFile file("../../folders.txt");
+	QFile file(foldersPath);
 	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&file);
 	

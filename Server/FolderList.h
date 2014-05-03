@@ -21,6 +21,7 @@ struct FolderList : public QObject
 		
 		FileWatcher fileWatcher;
 		Database* db;
+		QString foldersPath;
 		
 	public slots:
 		void rescanDir(const QString &path);
