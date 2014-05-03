@@ -130,14 +130,14 @@ struct Database
 	};
 	
 	//creates the album if it doesn't exist, and returns the id for an album with that title
-	id add_album(const char* name)
+	id add_album(id artist_id, const char* name)
 	{
 		if(!name) return 0;
 		auto it=albums.find(name);
 		if(it != albums.end())
 			return std::get<1>(*it);
 		++album_id;
-		auto b=new Album(album_id, strdup(name));
+		auto b=new Album(album_id, artist_id, strdup(name));
 		album_ids[album_id]=b;
 		albums[b->name]=album_id;
 		return album_id;

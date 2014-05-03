@@ -81,7 +81,7 @@ struct Client : QObject
 		auto album_message=QString("new_album|%1\n").arg(b.get_id());
 		auto utf8=album_message.toUtf8();
 		socket->write(utf8);
-		auto info_message=QString("album_info|%1|%2|").arg(b.get_id()).arg(b.name);
+		auto info_message=QString("album_info|%1|%2|%3|").arg(b.get_id()).arg(b.name).arg(b.artist_id);
 			unsigned int i;
 			for(i=0; i<b.get_n_tracks(); i++)
 			{
@@ -147,12 +147,12 @@ void send_song_with_deps(Client* c, const Song* s, Database* db)
 {
 	const Artist* a=db->find_artist(s->get_artist());
 	const Album* b=db->find_album(s->get_album());
-	if(!c->knows_artist(a->get_id()))
+	if(a && !c->knows_artist(a->get_id()))
 	{
 		c->send_artist(*a);
 	}
 	c->send_song(*s);
-	if(!c->knows_album(b->get_id()))
+	if(b && !c->knows_album(b->get_id()))
 	{
 		send_album_with_deps(c, b, db);
 	}

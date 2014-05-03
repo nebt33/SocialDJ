@@ -9,7 +9,7 @@ typedef unsigned int id;
 
 struct Album
 {
-	Album(id b, const char* album_name){bid=b; name=strdup(album_name);};
+	Album(id b, id artist, const char* album_name){bid=b; artist_id=artist; name=strdup(album_name);};
 	~Album() {free(name);}
 	void add_track(id t){};
 
@@ -28,6 +28,7 @@ struct Album
 	}
 	
 	id bid;
+	id artist_id;
 	char* name=nullptr;
 	std::vector<id> tracks;
 };
