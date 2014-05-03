@@ -1,4 +1,4 @@
-//Queue.h
+///Queue.h
 #include "item.h"
 #include <string.h>
 #include <unordered_set>
@@ -13,11 +13,12 @@
 #include <QString>
 #include <QTranslator>
 #include <QWidget>
-#include <unordered_set>
 #include <iostream>
 #include <functional>
 #include <assert.h>
 #include <QtMultimedia/QMediaPlayer>
+#include "Player.h"
+
 
 struct Queue : public QObject
 {
@@ -38,10 +39,20 @@ struct Queue : public QObject
 				submitterID = id;
 				clientsVoted.insert(id);
 			}
-		};
-		std::list<QueueObject> queue;
+		};		
 		
-		const Song* currentlyPlaying;
+		std::list<QueueObject> queue;
+		Player *connectedPlayer;
+		const Song* currentlyPlaying;				
+					
+		Queue(Player *player)
+		{
+			//Connect the queue to the player so that the queue knows when a song ends
+			connectedPlayer = player;
+			connectedPlayer->playlist->connect(player->player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
+
+		}
+	
 		
 		void insertSong(const Song *s, int submitterID);
 		int evaluateVote(int increase, const Song *s, int submitterID);
@@ -49,16 +60,17 @@ struct Queue : public QObject
 	public slots:
 		void mediaStatusChanged(QMediaPlayer::MediaStatus status)
 		{
-					std::cout << "THE SIG WORKED " << status <<  std::endl;
-			//Song playing has ended, pop top song of queue and set currentlyPlaying
-			if(status == 8)
+			//Song playing has ended or song has been skipped, pop top song of queue and set currentlyPlaying
+			if(status == 7 || status == 1)
 			{
 				if(queue.size() > 0)
 				{
-				    //currentlyPlaying = queue.pop_front();
+					currentlyPlaying = queue.front().song;
+					queue.pop_front();
+					connectedPlayer->newSong(currentlyPlaying);
 				}
 			}
-		}
-	
+		}	
 };
+
 

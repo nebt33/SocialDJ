@@ -60,5 +60,6 @@ struct Song
 	id artist;
 	char* title=nullptr;
 	unsigned int duration=0;
+	char* path;
 };
 #endif

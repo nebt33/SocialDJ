@@ -132,7 +132,7 @@ static void addSongFromPath(QString path, Database& db)
 			
 		id albumId;
 		if(album != NULL )
-			albumId = db.add_artist(album);
+			albumId = db.add_album(album);
 		else
 			albumId = 0;
 			

@@ -1,0 +1,12 @@
+moc_*
+qrc_*
+*.o
+Makefile.generated
+*.pro
+*.moc
+*.jpg
+*.mp3
+Makefile.*
+object_script.*
+release/
+desktop.ini

@@ -13,10 +13,9 @@
 #include <assert.h>
 #include <QtMultimedia/QMediaPlayer>
 
-#include "item.h"
 #include "Database.h"
 #include "FolderList.h"
-#include "Player.h"
+#include "Queue.h"
 
 //keeps track of which songs, albums, and artists the client has been told about; the client can send a message to clear these if forgets everything
 struct Client : QObject
@@ -229,8 +228,8 @@ class Server: public QObject
 			folders = new FolderList(*db);
 			
 			folders->initFolderList();
-			queue = new Queue();
-			player = new Player(queue);
+			player = new Player();
+			queue = new Queue(player);
 			
 			setParent(parent);
 			createTrayIcon();
