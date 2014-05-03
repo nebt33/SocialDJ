@@ -20,7 +20,6 @@ struct Player : public QObject
 			player = new QMediaPlayer(0);
 			playlist = new QMediaPlaylist(0);
 			
-			playlist->addMedia(QUrl::fromLocalFile("C:/Users/Trey/Documents/cs397/SocialDJ/Server/Server/07 Head On A Plate.mp3"));
 			playlist->setPlaybackMode(QMediaPlaylist::Sequential);
 			player->setPlaylist(playlist);
 
