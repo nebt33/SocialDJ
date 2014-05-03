@@ -30,7 +30,7 @@ struct Client : QObject
 	std::unordered_set<id> albums;
 	std::unordered_set<id> artists;
 	QTcpSocket* socket;
-	long long mac=0;
+	client_id mac=0;
 	
 	//returns whether successful
 	bool set_mac(int ip)
@@ -143,7 +143,7 @@ struct Client : QObject
 		socket->write(info_message.toUtf8());
 		artists.insert(a.get_id());
 	}
-
+	
 	public slots:
 	void read_lines()
 	{
@@ -258,7 +258,8 @@ class Server: public QObject
 			
 			folders->initFolderList();
 			player = new Player();
-			queue = new Queue(player);
+			//std::function<void(const Song*)> song_removed;
+			queue = new Queue(player/*, [&](const Song* s){;}*/);
 			
 			setParent(parent);
 			createTrayIcon();
@@ -329,6 +330,7 @@ class Server: public QObject
 				clients[i]->send_song_info(*s);
 			}
 		}
+		
 		void song_deleted(id s)
 		{
 			//send the notification to all quiescent clients
@@ -343,22 +345,80 @@ class Server: public QObject
 				}
 			}
 		}
+		
+		void queue_top_removed(const Song* s)
+		{
+			//send the notification to all clients
+			auto msg=QString("remove_top|%1\n").arg(s->get_id());
+			auto utf8=msg.toUtf8();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				clients[i]->socket->write(utf8);
+			}
+		}
+		
 		void quit_cb()
 		{
 			folders->writeFolders();
 			QCoreApplication::quit();
 		}
 		
+		void queue_add(Client* c, const QStringList& args)
+		{
+			if(args.size()>1)
+			{
+				//parse vote|song_id|value
+				auto song_id=args[1].toInt();
+				auto s=db->find_song(song_id);
+				
+				//parse queue_add|song_id
+				if(s == nullptr)
+				{
+					return;
+				}
+				
+				//update queue
+				queue->insertSong(s, c->mac);
+				
+				//send all clients the queue modification
+				auto add_msg=QString("add_bottom|%1\n").arg(song_id);
+				auto utf8=add_msg.toUtf8();
+				
+				unsigned int i;
+				for(i=0; i<clients.size(); i++)
+				{
+					clients[i]->socket->write(utf8);
+				}
+			}
+		}
+		
 		void vote(Client* c, const QStringList& args)
 		{
 			if(args.size()>2)
 			{
+				//parse vote|song_id|value
 				auto song_id=args[1].toInt();
 				auto value=args[2].toInt();
 				auto s=db->find_song(song_id);
-				if(s != nullptr)
+				
+				//parse vote|song_id|value
+				if(s == nullptr)
 				{
-					queue->evaluateVote(value>0, s, c->mac);
+					return;
+				}
+				
+				//update queue
+				auto score=queue->evaluateVote(value>0, s, c->mac);
+				
+				//send all clients the score modification
+				auto score_msg=QString("score|%1|%2").arg(song_id).arg(score);
+				auto utf8=score_msg.toUtf8();
+				
+				unsigned int i;
+				for(i=0; i<clients.size(); i++)
+				{
+					clients[i]->socket->write(utf8);
 				}
 			}
 		}
@@ -432,6 +492,8 @@ class Server: public QObject
 			dispatch(play)
 			dispatch(pause)
 			dispatch(skip)
+			dispatch(vote)
+			dispatch(queue_add)
 			{}
 			#undef dispatch
 		}
@@ -442,6 +504,20 @@ class Server: public QObject
 			auto c=new Client([&](Client* c, const QString& line){printf("got: %s\n", line.toUtf8().constData()); this->client_message(c, line);});
 			c->socket=listen_socket->nextPendingConnection();
 			clients.push_back(c);
+			
+			//send the current state of the queue
+			for(auto it=queue->queue.begin(); it!=queue->queue.end(); ++it)
+			{
+				auto song_id=(*it).song->get_id();
+				auto score=(*it).numVotes;
+				
+				auto add_msg=QString("add_bottom|%1\n").arg(song_id);
+				auto utf8=add_msg.toUtf8();
+				c->socket->write(utf8);
+				auto score_msg=QString("score|%1|%2\n").arg(song_id).arg(score);
+				utf8=score_msg.toUtf8();
+				c->socket->write(utf8);
+			}
 			
 			c->socket->connect(c->socket, SIGNAL(readyRead()), c, SLOT(read_lines()));
 		}
