@@ -154,10 +154,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		else
 			albumId = 0;
 			
-		id theId;
-		//if(std::unordered_map::end == addedSongs.find(path))
-			theId = db.add_song();
-		//else
+		id theId = db.add_song();
 		
 		printf("update_song(%u, %s, %u, %u, %u, %u);\n", theId, song, artistId, albumId, index, duration);
 		db.update_song(theId, song, artistId, albumId, index, duration);

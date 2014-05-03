@@ -1,5 +1,4 @@
 #include "Database.h"
-#include "FileWatcher.h"
 #include <QWidget> 
 #include <QFileSystemWatcher>
 #include <QStringList>
@@ -44,16 +43,13 @@ struct FolderList : public QObject
 		void writeFolders();
 		
 		//keeps track of and adds songs from directories the user specifies 
-		FileWatcher fileWatcher;
+		QFileSystemWatcher fileWatcher;
 		
 		//the database of song information found
 		Database* db;
 		
 		//the absolute path of the file to track folders
 		QString foldersPath;
-		
-		//map of mp3 path to id to track the songs we have added to the database
-		//std::unordered_map<QString,id> addedSongs;
 		
 	public slots:
 		//scans a directory and its subdirectories for mp3 files. to be called
