@@ -125,7 +125,7 @@ static void addSongFromPath(QString path, Database& db)
 			{
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				const char* temp = field->GetRawText();
-				sscanf(temp, "%d/",&index);
+				if(temp) sscanf(temp, "%d/",&index);
 			}
 			
 		}
