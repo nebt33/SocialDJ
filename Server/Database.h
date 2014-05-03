@@ -157,12 +157,12 @@ struct Database
 		return artist_id;
 	};
 	
-	//creates a new song with no info
-	id add_song()
+	//creates a new song with only a filename
+	id add_song(const char* path)
 	{
 		++song_id;
 		printf("added song %u\n", song_id);
-		auto s=new Song(song_id, 0, 0, nullptr);
+		auto s=new Song(song_id, 0, 0, nullptr, path);
 		song_ids[song_id]=s;
 		songs[s->title]=song_id;
 		return song_id;

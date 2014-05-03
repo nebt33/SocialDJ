@@ -93,7 +93,8 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		unsigned int duration = 0;
 		QString fullPath = dirPath + "/" + fileName;
 		//get id3 info and add song to database
-		ID3_Tag tag(fullPath.toUtf8().constData());
+		auto pathBytes = fullPath.toUtf8().constData();
+		ID3_Tag tag(pathBytes);
 		if(tag.NumFrames() > 0)
 		{
 			//get song title
@@ -154,7 +155,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		else
 			albumId = 0;
 			
-		id theId = db.add_song();
+		id theId = db.add_song(pathBytes);
 		
 		printf("update_song(%u, %s, %u, %u, %u, %u);\n", theId, song, artistId, albumId, index, duration);
 		db.update_song(theId, song, artistId, albumId, index, duration);

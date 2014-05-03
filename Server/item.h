@@ -47,8 +47,8 @@ struct Artist
 
 struct Song
 {
-	Song(id s, id album_id, id artist_id, const char* song_title){sid=s; album=album_id; artist=artist_id; title=song_title?strdup(song_title):nullptr;};
-	~Song(){free(title);}
+	Song(id s, id album_id, id artist_id, const char* song_title, const char* path){sid=s; album=album_id; artist=artist_id; title=song_title?strdup(song_title):nullptr; path=strdup(path);};
+	~Song(){free(title);free(path);}
 	void set_duration(unsigned int tenths){this->duration = tenths;}
 	
 	id get_album() const {return this->album;};//may be 0
