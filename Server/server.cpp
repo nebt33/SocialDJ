@@ -12,6 +12,8 @@
 #include <functional>
 #include <assert.h>
 #include <QtMultimedia/QMediaPlayer>
+#include <QProcess>
+#include <QRegularExpression>
 
 #include "Database.h"
 #include "FolderList.h"
@@ -28,6 +30,38 @@ struct Client : QObject
 	std::unordered_set<id> albums;
 	std::unordered_set<id> artists;
 	QTcpSocket* socket;
+	long long mac=0;
+	
+	//returns whether successful
+	bool set_mac(int ip)
+	{
+		QProcess process;
+		process.start(QString("arp -a %1").arg(ip));
+		auto bytes=process.readAllStandardOutput();
+		auto str=QString::fromLatin1(bytes);
+		auto regex=QRegularExpression(QString("([ :-](?<[0-9a-f]{2})){6}"));
+		auto index=str.indexOf(regex);
+		if(index == -1)
+			return false;
+		
+		mac=0;
+		//parse MAC address from matched 18-char string
+		int i;
+		for(i=index; i<index+6*3; i++);
+		{
+			char c=str[i].cell();
+			int nibble=-1;
+			if(c>='0' || c<='9')
+				nibble=c-'0';
+			else if(c>='a' || c<='f')
+				nibble=c-'a'+10;
+			else if(c>='A' || c<='F')
+				nibble=c-'A'+10;
+			if(nibble != -1)
+				mac=(mac<<4)+nibble;
+		}
+		return true;
+	}
 	
 	Client(std::function<void(Client* c, const QString& args)> handler) : handle_message(handler)
 	{
@@ -83,9 +117,11 @@ struct Client : QObject
 		socket->write(utf8);
 		auto info_message=QString("album_info|%1|%2|%3|").arg(b.get_id()).arg(b.name).arg(b.artist_id);
 			unsigned int i;
+			auto tracks=b.get_tracks();
 			for(i=0; i<b.get_n_tracks(); i++)
 			{
-				info_message+=QString("%1,").arg(b.get_tracks()[i]);
+				if(tracks[i] == 0) continue;
+					info_message+=QString("%1,").arg(tracks[i]);
 			}
 			info_message+="\n";
 		utf8=info_message.toUtf8();
@@ -313,6 +349,35 @@ class Server: public QObject
 			QCoreApplication::quit();
 		}
 		
+		void vote(Client* c, const QStringList& args)
+		{
+			if(args.size()>2)
+			{
+				auto song_id=args[1].toInt();
+				auto value=args[2].toInt();
+				auto s=db->find_song(song_id);
+				if(s != nullptr)
+				{
+					queue->evaluateVote(value>0, s, c->mac);
+				}
+			}
+		}
+		
+		void play(Client* c, const QStringList& args)
+		{
+			player->play();
+		}
+		
+		void pause(Client* c, const QStringList& args)
+		{
+			player->pause();
+		}
+		
+		void skip(Client* c, const QStringList& args)
+		{
+			player->next();
+		}
+		
 		void download_song(Client* c, const QStringList& args)
 		{
 			//nyi
@@ -364,36 +429,21 @@ class Server: public QObject
 			dispatch(list_songs)
 			dispatch(list_albums)
 			dispatch(list_artists)
+			dispatch(play)
+			dispatch(pause)
+			dispatch(skip)
 			{}
 			#undef dispatch
 		}
 		
 		void client_connected_cb()
 		{
-			printf("called\n");
-			auto c=new Client([&](Client* c, const QString& args){this->client_message(c, args);});
+			printf("client connected\n");
+			auto c=new Client([&](Client* c, const QString& line){printf("got: %s\n", line.toUtf8().constData()); this->client_message(c, line);});
 			c->socket=listen_socket->nextPendingConnection();
 			clients.push_back(c);
 			
-			
 			c->socket->connect(c->socket, SIGNAL(readyRead()), c, SLOT(read_lines()));
-			/*
-			auto socket=c->socket;
-			socket->write("new_song|1\n");
-			socket->write("new_artist|1\n");
-			socket->write("artist_info|1|The Physics\n");
-			socket->write("new_album|1\n");
-			socket->write("album_info|1|High Society EP|1\n");
-			socket->write("song_info|1|album|1|artist|1|duration|173.2\n");
-			socket->write("song_info|1|title|The Session\n");
-			socket->write("add_bottom|1\n");
-			socket->write("score|1|4\n");
-			socket->write("new_song|2\n");
-			socket->write("new_artist|2\n");
-			socket->write("artist_info|2|Miami Horror\n");
-			socket->write("song_info|2|artist|2|duration|251.1|title|Sometimes\n");
-			socket->write("add_bottom|2\n");
-			*/
 		}
 		
 		void addDirectories()
@@ -408,43 +458,7 @@ int main(int argc, char** argv)
 	QApplication app(argc, argv);
 	
 	auto s=new Server(&app);
-	//folders.add_folder_by_choosing();
 	app.exec();
-	return 0;
-	while(!s->quit)
-	{
-		//select(listen_socket, sockets, qt)
-		//listen_socket->exec();
-		/*switch(source)
-		{
-			case qt:
-				if(message==do_choose)
-					folders.add_folder_by_choosing();
-				break;
-			case listen_clients:
-					client_sockets.add_client()
-				break;
-			case client_sockets:
-				Socket active_client=message.sender;
-				switch(message)
-				{
-					case start_download:
-						//do that
-					case play:
-					case pause:
-					case skip:
-						//pass to queue
-						break;
-					case search_songs:
-						folders.search(message.query);
-						break;
-					case search_albums:
-						folders.search(message.query);
-						break;
-				}
-				break;
-		}*/
-	}
 	return 0;
 }
 
