@@ -82,17 +82,18 @@ void FolderList::add_folders(QStringList paths)
 	QMessageBox::information(0, QString("Social DJ"), QString("Done Adding Folders"));
 }
 
-static void addSongFromPath(QString path, Database& db)
+static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 {
-	if(path.endsWith(".mp3"))
+	if(fileName.endsWith(".mp3"))
 	{
 		const char* song = NULL;
 		const char* album = NULL;
 		const char* artist = NULL;
 		unsigned int index = 0;
 		unsigned int duration = 0;
+		QString fullPath = dirPath + "/" + fileName;
 		//get id3 info and add song to database
-		ID3_Tag tag(path.toUtf8().constData());
+		ID3_Tag tag(fullPath.toUtf8().constData());
 		if(tag.NumFrames() > 0)
 		{
 			//get song title
@@ -102,6 +103,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				song = field->GetRawText();
 			}
+			//qDebug()<<"id3 song name: "<<song;
 			
 			//get album name
 			frame = tag.Find(ID3FID_ALBUM);
@@ -110,6 +112,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				album = field->GetRawText();
 			}
+			//qDebug()<<"id3 album name: "<<album;
 			
 			//get artist name
 			frame = tag.Find(ID3FID_LEADARTIST);
@@ -118,6 +121,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				artist = field->GetRawText();
 			}
+			//qDebug()<<"id3 artist name: "<<artist;
 			
 			//get song index on album
 			frame = tag.Find(ID3FID_TRACKNUM);
@@ -127,12 +131,13 @@ static void addSongFromPath(QString path, Database& db)
 				const char* temp = field->GetRawText();
 				if(temp) sscanf(temp, "%d/",&index);
 			}
+			//qDebug()<<"id3 track number: "<<index;
 			
 		}
 		//if we didn't get a song name from the id3 tag, use the file name
 		if(song == NULL)
 		{
-			song = path.toUtf8().constData();
+			song = fileName.toUtf8().constData();
 		}
 		
 		//add the artist to the database
@@ -223,7 +228,7 @@ void FolderList::scanDirs(QStringList dirs)
 		QStringList files = dir->entryList(QDir::Files);
 		for(int i = 0; i < files.size(); i++) 
 		{
-			addSongFromPath((dir->absolutePath() + "/" + files[i]).toUtf8().constData(), *db);
+			addSongFromPath(dir->absolutePath(), files[i], *db);
 		}
 	}
 }
