@@ -2,6 +2,9 @@
 #include "Player.h"
 #include <iostream>
 
+//Called in the queue when a new song ends.
+//If the player stops because there was no song remaining in the queue newSong is 
+//used to start playing the next song.
 void Player::newSong(const Song *song)
 {
 	playlist->clear();
@@ -10,7 +13,7 @@ void Player::newSong(const Song *song)
 }
 
 
-
+//Skips the currently playing song
 void Player::next()
 {
     playlist->clear();
@@ -18,7 +21,8 @@ void Player::next()
 }
 
 
-void Player::Play()
+//Resumes play if the music was paused
+void Player::play()
 {
 	player->play();
 }
