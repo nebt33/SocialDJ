@@ -30,9 +30,9 @@ client->server messages:
 		delete_song|song_id
 	queue:
 		queue_add|song_id
-	vote|song_id|value
+		vote|song_id|value
 	playback:
-	play
-	pause
-	skip
+		play
+		pause
+		skip
 metaitems are one of: artist, album, title, duration
