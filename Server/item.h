@@ -20,9 +20,9 @@ struct Album
 	
 	void set_id_at(unsigned int at, id which)
 	{
-		if(tracks.size() < at+1)
+		while(tracks.size() < at+1)
 		{
-			tracks.resize(at+1, 0);
+			tracks.push_back(0);
 		}
 		tracks[at]=which;
 	}

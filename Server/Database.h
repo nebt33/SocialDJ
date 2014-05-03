@@ -34,9 +34,30 @@
 	}\
 }
 
-cmp_class(SongTitle,Song,title);
-cmp_class(ArtistName,Artist,name);
-cmp_class(AlbumName,Album,name);
+//cmp_class(SongTitle,Song,title);
+//cmp_class(ArtistName,Artist,name);
+//cmp_class(AlbumName,Album,name);
+
+struct StrSort
+{
+	bool operator()(const char* const& a, const char* const& b)
+	{
+		if(a)
+		{
+			if(b)
+				return strcasecmp(a,b)<0;
+			else
+				return 1;
+		}
+		else
+		{
+			if(b)
+				return 0;
+			else
+				return 1;
+		}
+	}
+};
 
 enum MetaItem
 {
@@ -69,7 +90,7 @@ struct Database
 			auto it=in.find(n);\
 			if(it == in.end()) return NULL;\
 			return std::get<1>(*it);
-				
+	
 	Song* find_song(id n) const { lookup(song_ids) };//may be NULL
 	Album* find_album(id n) const { lookup(album_ids) };//may be NULL
 	const Artist* find_artist(id n) const { lookup(artist_ids) };//may be NULL
@@ -88,13 +109,15 @@ struct Database
 			if(a->get_n_tracks() == 0)
 			{
 				std::remove(a->tracks.begin(), a->tracks.end(), n);
-				albums.erase(a);
+				albums.erase(a->name);
 				album_ids.erase(ait);
 				delete a;
 			}
 		}
+		songs.erase(s->title);
 		
-		//if the song's artist reaches 0 tracks, delete it
+		//TODO: if the song's artist reaches 0 tracks, delete it
+		
 		delete s;
 		deleted_cb(n);
 	};
@@ -109,18 +132,28 @@ struct Database
 	//creates the album if it doesn't exist, and returns the id for an album with that title
 	id add_album(const char* name)
 	{
+		if(!name) return 0;
+		auto it=albums.find(name);
+		if(it != albums.end())
+			return std::get<1>(*it);
 		++album_id;
-		album_ids[album_id]=new Album(album_id, name?strdup(name):nullptr);
-		albums[album_ids[album_id]]=true;
+		auto b=new Album(album_id, strdup(name));
+		album_ids[album_id]=b;
+		albums[b->name]=album_id;
 		return album_id;
 	};
 	
 	//creates the artist if it doesn't exist, and returns the id for an artist with that name
 	id add_artist(const char* name)
 	{
+		if(!name) return 0;
+		auto it=artists.find(name);
+		if(it != artists.end())
+			return std::get<1>(*it);
 		++artist_id;
-		artist_ids[artist_id]=new Artist(artist_id, name?strdup(name):nullptr);
-		artists[artist_ids[artist_id]]=true;
+		auto a=new Artist(artist_id, strdup(name));
+		artist_ids[artist_id]=a;
+		artists[a->name]=artist_id;
 		return artist_id;
 	};
 	
@@ -129,8 +162,9 @@ struct Database
 	{
 		++song_id;
 		printf("added song %u\n", song_id);
-		song_ids[song_id]=new Song(song_id, 0, 0, nullptr);
-		songs[song_ids[song_id]]=true;
+		auto s=new Song(song_id, 0, 0, nullptr);
+		song_ids[song_id]=s;
+		songs[s->title]=song_id;
 		return song_id;
 	};
 	
@@ -218,13 +252,13 @@ struct Database
 	list_simple(Artist,artist,name)
 	
 	std::unordered_map<id,Song*> song_ids;
-	std::map<Song*,bool,SongTitle> songs;
+	std::map<const char*,id,StrSort> songs;
 	id song_id=0;
 	std::unordered_map<id,Album*> album_ids;
-	std::map<Album*,bool,AlbumName> albums;
+	std::map<const char*,id,StrSort> albums;
 	id album_id=0;
 	std::unordered_map<id,Artist*> artist_ids;
-	std::map<Artist*,bool,ArtistName> artists;
+	std::map<const char*,id,StrSort> artists;
 	id artist_id=0;
 };
 #endif

@@ -137,6 +137,7 @@ static void addSongFromPath(QString path, Database& db)
 			albumId = 0;
 			
 		id newId = db.add_song();
+		printf("update_song(%u, %s, %u, %u, %u, %u);\n", newId, song, artistId, albumId, index, duration);
 		db.update_song(newId, song, artistId, albumId, index, duration);
 	}
 }

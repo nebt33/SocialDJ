@@ -51,19 +51,19 @@ struct Client : QObject
 		auto info_msg=QString("song_info|%1").arg(s.get_id());
 		if(s.duration != 0)
 		{
-			info_msg+=QString("duration|%1").arg(s.duration);
+			info_msg+=QString("|duration|%1").arg(s.duration);
 		}
 		if(s.artist != 0)
 		{
-			info_msg+=QString("artist|%1").arg(s.artist);
+			info_msg+=QString("|artist|%1").arg(s.artist);
 		}
 		if(s.album != 0)
 		{
-			info_msg+=QString("album|%1").arg(s.album);
+			info_msg+=QString("|album|%1").arg(s.album);
 		}
 		if(s.title != nullptr)
 		{
-			info_msg+=QString("title|%1").arg(s.title);
+			info_msg+=QString("|title|%1").arg(s.title);
 		}
 		info_msg+="\n";
 		auto utf8=info_msg.toUtf8();
@@ -118,7 +118,32 @@ struct Client : QObject
 	}
 };
 
-void send_song_with_deps(Client* c, Song* s, Database* db)
+void send_album_with_deps(Client* c, const Album* b, Database* db)
+{
+	auto tracks=b->get_tracks();
+	unsigned int i;
+	printf("n_tracks: %u\n", b->get_n_tracks());
+	printf("sending tracks: %p\n", tracks);
+	for(i=0; i<b->get_n_tracks(); i++)
+	{
+		printf("sending track %u\n", tracks[i]);
+		if(!c->knows_song(tracks[i]))
+		{
+			auto s=db->find_song(tracks[i]);
+			if(!s) continue;
+			c->send_song(*s);
+		}
+	}
+	c->send_album(*b);
+/*	for(i=0; i<b->get_n_tracks(); i++)
+	{
+		auto s=db->find_song(tracks[i]);
+		if(!s) continue;
+		send_song_with_deps(c, s, db);
+	}*/
+}
+
+void send_song_with_deps(Client* c, const Song* s, Database* db)
 {
 	const Artist* a=db->find_artist(s->get_artist());
 	const Album* b=db->find_album(s->get_album());
@@ -129,45 +154,13 @@ void send_song_with_deps(Client* c, Song* s, Database* db)
 	c->send_song(*s);
 	if(!c->knows_album(b->get_id()))
 	{
-		unsigned int i;
-		for(i=0; i<b->get_n_tracks(); i++)
-		{
-			id n=b->get_tracks()[i];
-			if(!c->knows_song(n))
-			{
-				c->send_song(*db->find_song(n));
-			}
-		}
-		c->send_album(*b);
+		send_album_with_deps(c, b, db);
 	}
-	if(!c->knows_song(s->get_id()))
-	{
-		c->send_song(*s);
-	}
-	c->send_song(*s);
+	
+	c->send_song_info(*s);
 }
 
-void send_album_with_deps(Client* c, Album* b, Database* db)
-{
-	auto tracks=b->get_tracks();
-	unsigned int i;
-	for(i=0; i<b->get_n_tracks(); i++)
-	{
-		if(!c->knows_song(tracks[i]))
-		{
-			c->send_song(*db->find_song(tracks[i]));
-		}
-	}
-	for(i=0; i<b->get_n_tracks(); i++)
-	{
-		if(!c->knows_song(tracks[i]))
-		{
-			c->send_song(*db->find_song(tracks[i]));
-		}
-	}
-}
-
-void send_artist_with_deps(Client* c, Artist* a, Database* db)
+void send_artist_with_deps(Client* c, const Artist* a, Database* db)
 {
 	c->send_artist(*a);
 }
