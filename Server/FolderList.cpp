@@ -15,14 +15,14 @@
 #include <QStandardPaths>
 #include <queue>
 
+
 FolderList::FolderList(Database& thedb)
 {
 	db = &thedb;
 	connect(&fileWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(rescanDir(QString)));
 }
 
-//TODO: remove parent parameter if this is the way we do it
-void FolderList::add_folders_by_choosing(QWidget* parent)
+void FolderList::add_folders_by_choosing()
 {
 	QFileDialog dialog;
 	dialog.setFileMode(QFileDialog::DirectoryOnly);
@@ -35,6 +35,7 @@ void FolderList::add_folders_by_choosing(QWidget* parent)
     if (t)
 		t->setSelectionMode(QAbstractItemView::MultiSelection);
 	
+	//pop up the dialog and add the selected directories to the file watcher
 	if( dialog.exec() )
 	{
 		QStringList dirs = dialog.selectedFiles();
@@ -45,12 +46,14 @@ void FolderList::add_folders_by_choosing(QWidget* parent)
 void FolderList::add_folders(QStringList paths)
 {
 	QStringList::const_iterator it;
+	//for every path given, add it to the file watcher and scan it for files
 	for (it = paths.begin(); it != paths.end(); it++)
 	{
 		QDir *dir = new QDir(QString(*it));
 		std::queue<QString> queue;
 		queue.push(dir->absolutePath());
 		QStringList results;
+		//add subdirectories
 		while (!queue.empty()) {
 			auto const subdir_name = queue.front();
 			queue.pop();
@@ -62,12 +65,20 @@ void FolderList::add_folders(QStringList paths)
 				queue.push(data.absoluteFilePath());
 			}
 		}
+		//for the given path and all its subdirectories, add the path the file watcher
 		for(int i = 0; i < results.size(); i++)
 		{
-			fileWatcher.addPath(results[i]);
+			if(-1 == fileWatcher.directories().indexOf(results[i]))
+			{
+				qDebug()<<"adding new dir: "<<results[i];
+				fileWatcher.addPath(results[i]);
+				scanDirs(results);
+			}
+			else
+				qDebug()<<"dir already being watched: "<<results[i];
 		}
-		scanDirs(results);
 	}
+	//let the user know we added the directories in case it took a while
 	QMessageBox::information(0, QString("Social DJ"), QString("Done Adding Folders"));
 }
 
@@ -91,7 +102,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				song = field->GetRawText();
 			}
-			qDebug() << "title: "<<song;
+			
 			//get album name
 			frame = tag.Find(ID3FID_ALBUM);
 			if( NULL != frame)
@@ -99,7 +110,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				album = field->GetRawText();
 			}
-			qDebug() << "album: "<<album;
+			
 			//get artist name
 			frame = tag.Find(ID3FID_LEADARTIST);
 			if( NULL != frame)
@@ -107,7 +118,7 @@ static void addSongFromPath(QString path, Database& db)
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
 				artist = field->GetRawText();
 			}
-			qDebug() << "artist: "<<artist;
+			
 			//get song index on album
 			frame = tag.Find(ID3FID_TRACKNUM);
 			if( NULL != frame)
@@ -116,28 +127,34 @@ static void addSongFromPath(QString path, Database& db)
 				const char* temp = field->GetRawText();
 				sscanf(temp, "%d/",&index);
 			}
-			qDebug() << "index: "<<index;
-			qDebug() << "\n";
+			
 		}
+		//if we didn't get a song name from the id3 tag, use the file name
 		if(song == NULL)
 		{
 			song = path.toUtf8().constData();
 		}
 		
+		//add the artist to the database
 		id artistId;
 		if(artist != NULL )
 			artistId = db.add_artist(artist);
 		else
 			artistId = 0;
 			
+		//add the album to the database
 		id albumId;
 		if(album != NULL )
 			albumId = db.add_album(album);
 		else
 			albumId = 0;
 			
-		id newId = db.add_song();
-		db.update_song(newId, song, artistId, albumId, index, duration);
+		id theId;
+		//if(std::unordered_map::end == addedSongs.find(path))
+			theId = db.add_song();
+		//else
+		
+		db.update_song(theId, song, artistId, albumId, index, duration);
 	}
 }
 
@@ -212,6 +229,5 @@ void FolderList::scanDirs(QStringList dirs)
 
 void FolderList::rescanDir(const QString &path)
 {
-	qDebug()<<"rescanning dir";
-	add_folders(QStringList(path));
+	//add_folders(QStringList(path));
 }

@@ -250,7 +250,7 @@ class Server: public QObject
 		{
 			 trayIconMenu = new QMenu();
 			 
-			 auto addDirectoriesAction = new QAction(tr("Select Directories"), this);
+			 auto addDirectoriesAction = new QAction(tr("Add Directories"), this);
 			 connect(addDirectoriesAction, SIGNAL(triggered()), this, SLOT(addDirectories()));
 			 
 			 auto quitAction = new QAction(tr("Exit"), this);
@@ -405,7 +405,7 @@ class Server: public QObject
 		
 		void addDirectories()
 		{
-			folders->add_folders_by_choosing((QWidget*)trayIconMenu);
+			folders->add_folders_by_choosing();
 		}
 		
 };
