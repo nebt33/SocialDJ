@@ -13,7 +13,7 @@ struct Album
 	Album(id b, id artist, const char* album_name){bid=b; artist_id=artist; name=strdup(album_name);};
 	~Album() {free(name);}
 	void add_track(id t){};
-
+	
 	const char* get_name() const {return this->name;};//may be NULL, e.g. if the album title is unknown
 	unsigned int get_n_tracks() const {return this->tracks.size();};//returns how many tracks the album has; if we don't have all tracks on the album this would be the highest known track number
 	const id* get_tracks() const {return this->tracks.data();};//returns an array of track IDs, with 0s in the spots where no track is known
@@ -47,7 +47,7 @@ struct Artist
 
 struct Song
 {
-	Song(id s, id album_id, id artist_id, const char* song_title, const char* path){sid=s; album=album_id; artist=artist_id; title=song_title?strdup(song_title):nullptr; path=strdup(path);};
+	Song(id s, id album_id, id artist_id, const char* song_title, const char* song_path){sid=s; album=album_id; artist=artist_id; title=song_title?strdup(song_title):nullptr; path=strdup(song_path);};
 	~Song(){free(title);free(path);}
 	void set_duration(unsigned int tenths){this->duration = tenths;}
 	

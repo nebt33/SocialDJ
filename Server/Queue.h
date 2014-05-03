@@ -24,7 +24,7 @@ struct Queue : public QObject
 {
 	private:
 		Q_OBJECT
-    public:
+	public:
 		struct QueueObject
 		{
 			int numVotes;
@@ -43,15 +43,16 @@ struct Queue : public QObject
 		
 		std::list<QueueObject> queue;
 		Player *connectedPlayer;
-		const Song* currentlyPlaying;				
-				
+		const Song* currentlyPlaying=nullptr;
+		std::function<void(const Song*)> top_removed;
 		
 		void insertSong(const Song *s, client_id submitterID);
 		void removeSong(const Song *s);
 		int evaluateVote(int increase, const Song *s, client_id submitterID);
 				
-		Queue(Player *player)
+		Queue(Player *player, std::function<void(const Song*)> top_removed_cb)
 		{
+			top_removed=top_removed_cb;
 			//Connect the queue to the player so that the queue knows when a song ends
 			connectedPlayer = player;
 			connectedPlayer->playlist->connect(player->player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
@@ -67,6 +68,8 @@ struct Queue : public QObject
 			{
 				if(queue.size() > 0)
 				{
+					if(currentlyPlaying)
+						top_removed(currentlyPlaying);
 					currentlyPlaying = queue.front().song;
 					queue.pop_front();
 					connectedPlayer->newSong(currentlyPlaying);

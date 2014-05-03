@@ -197,6 +197,7 @@ struct Database
 	
 	std::vector<Song*> list_songs(std::vector<ItemFilter>& filt, int start, int length)
 	{
+		int index=0;
 		printf("called list_songs\n");
 		std::vector<Song*> results;
 		for(auto i=song_ids.begin(); i!=song_ids.end(); ++i)
@@ -204,6 +205,8 @@ struct Database
 			auto song=std::get<1>(*i);
 			printf("song %s\n", song->title);
 			auto matches=true;
+			if(index<start || index>=start+length)
+				matches=false;
 			unsigned int j;
 			for(j=0; j<filt.size(); j++)
 			{
@@ -231,6 +234,7 @@ struct Database
 			}
 			if(matches)
 				results.push_back(song);
+			index++;
 		}
 		return results;
 	}

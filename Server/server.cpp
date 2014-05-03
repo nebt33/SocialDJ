@@ -154,6 +154,8 @@ struct Client : QObject
 	}
 };
 
+void send_song_with_deps(Client* c, const Song* s, Database* db);
+
 void send_album_with_deps(Client* c, const Album* b, Database* db)
 {
 	auto tracks=b->get_tracks();
@@ -171,12 +173,12 @@ void send_album_with_deps(Client* c, const Album* b, Database* db)
 		}
 	}
 	c->send_album(*b);
-/*	for(i=0; i<b->get_n_tracks(); i++)
+	for(i=0; i<b->get_n_tracks(); i++)
 	{
 		auto s=db->find_song(tracks[i]);
 		if(!s) continue;
 		send_song_with_deps(c, s, db);
-	}*/
+	}
 }
 
 void send_song_with_deps(Client* c, const Song* s, Database* db)
@@ -258,8 +260,7 @@ class Server: public QObject
 			
 			folders->initFolderList();
 			player = new Player();
-			//std::function<void(const Song*)> song_removed;
-			queue = new Queue(player/*, [&](const Song* s){;}*/);
+			queue = new Queue(player, [&](const Song* s){queue_top_removed(s);});
 			
 			setParent(parent);
 			createTrayIcon();
@@ -364,6 +365,8 @@ class Server: public QObject
 			QCoreApplication::quit();
 		}
 		
+		//message handlers:
+		
 		void queue_add(Client* c, const QStringList& args)
 		{
 			if(args.size()>1)
@@ -388,6 +391,10 @@ class Server: public QObject
 				unsigned int i;
 				for(i=0; i<clients.size(); i++)
 				{
+					if(!clients[i]->knows_song(s->get_id()))
+					{
+						send_song_with_deps(c, s, db);
+					}
 					clients[i]->socket->write(utf8);
 				}
 			}
@@ -505,18 +512,27 @@ class Server: public QObject
 			c->socket=listen_socket->nextPendingConnection();
 			clients.push_back(c);
 			
-			//send the current state of the queue
-			for(auto it=queue->queue.begin(); it!=queue->queue.end(); ++it)
+			auto send_queue_song=[&](const Song* s, int score)
 			{
-				auto song_id=(*it).song->get_id();
-				auto score=(*it).numVotes;
-				
+				auto song_id=s->get_id();
+				send_song_with_deps(c, s, db);
 				auto add_msg=QString("add_bottom|%1\n").arg(song_id);
 				auto utf8=add_msg.toUtf8();
 				c->socket->write(utf8);
 				auto score_msg=QString("score|%1|%2\n").arg(song_id).arg(score);
 				utf8=score_msg.toUtf8();
 				c->socket->write(utf8);
+			};
+			
+			if(queue->currentlyPlaying)
+			{
+				send_queue_song(queue->currentlyPlaying, 1000000);
+			}
+			
+			//send the current state of the queue
+			for(auto it=queue->queue.begin(); it!=queue->queue.end(); ++it)
+			{
+				send_queue_song((*it).song, (*it).numVotes);
 			}
 			
 			c->socket->connect(c->socket, SIGNAL(readyRead()), c, SLOT(read_lines()));
