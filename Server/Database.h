@@ -205,8 +205,8 @@ struct Database
 			auto song=std::get<1>(*i);
 			printf("song %s\n", song->title);
 			auto matches=true;
-			if(index<start || index>=start+length)
-				matches=false;
+				if(index<start || index>=start+length)
+					matches=false;
 			unsigned int j;
 			for(j=0; j<filt.size(); j++)
 			{
@@ -233,8 +233,10 @@ struct Database
 					break;
 			}
 			if(matches)
+			{
 				results.push_back(song);
-			index++;
+				index++;
+			}
 		}
 		return results;
 	}
@@ -242,12 +244,17 @@ struct Database
 #define list_simple(Type,name,field) std::vector<Type*> list_##name##s(const char* query, int start, int length)\
 {\
 	std::vector<Type*> results;\
+	int index=0;\
 	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
 	{\
 		auto value=std::get<1>(*i);\
 		printf("checking %s for %s\n", value->field, query);\
 		if(!!strstr(value->field, query))\
-			results.push_back(value);\
+		{\
+			if(index>=start && index<start+length)\
+				results.push_back(value);\
+			index++;\
+		}\
 	}\
 	return results;\
 }

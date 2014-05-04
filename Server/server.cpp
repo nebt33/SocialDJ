@@ -231,6 +231,14 @@ std::vector<ItemFilter> parse_filters(const QStringList& args, unsigned int* sta
 	return filters;
 }
 
+void parse_lengths(const QStringList& args, unsigned int* start, unsigned int* length)
+{
+	std::vector<ItemFilter> filters;
+	auto it = args.constBegin();
+	*start=(*++it).toInt();
+	*length=(*++it).toInt();
+}
+
 id parse_id(const QString& s)
 {
 	return s.toInt();
@@ -391,7 +399,7 @@ class Server: public QObject
 				unsigned int i;
 				for(i=0; i<clients.size(); i++)
 				{
-					if(!clients[i]->knows_song(s->get_id()))
+					if(!clients[i]->knows_song(song_id))
 					{
 						send_song_with_deps(c, s, db);
 					}
@@ -470,7 +478,7 @@ class Server: public QObject
 			if(args.size()>3)
 			{
 				auto utf8=args[3].toUtf8();
-				do_list(album, auto filters=utf8.constData())
+				do_list(album, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
 			}
 		}
 		void list_artists(Client* c, const QStringList& args)
@@ -478,7 +486,7 @@ class Server: public QObject
 			if(args.size()>3)
 			{
 				auto utf8=args[3].toUtf8();
-				do_list(artist, auto filters=utf8.constData())
+				do_list(artist, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
 			}
 		}
 		
