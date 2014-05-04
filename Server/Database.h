@@ -203,14 +203,12 @@ struct Database
 		for(auto i=song_ids.begin(); i!=song_ids.end(); ++i)
 		{
 			auto song=std::get<1>(*i);
-			printf("song %s\n", song->title);
 			auto matches=true;
 				if(index<start || index>=start+length)
 					matches=false;
 			unsigned int j;
 			for(j=0; j<filt.size(); j++)
 			{
-				printf("checking %s\n", filt[j].value.constData());
 				switch(filt[j].field)
 				{
 					case ARTIST:
@@ -248,7 +246,6 @@ struct Database
 	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
 	{\
 		auto value=std::get<1>(*i);\
-		printf("checking %s for %s\n", value->field, query);\
 		if(!!strstr(value->field, query))\
 		{\
 			if(index>=start && index<start+length)\

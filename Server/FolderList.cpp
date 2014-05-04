@@ -94,6 +94,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		QString fullPath = dirPath + "/" + fileName;
 		//get id3 info and add song to database
 		auto pathUtf8 = fullPath.toUtf8();
+		auto nameUtf8 = fileName.toUtf8();
 		ID3_Tag tag(pathUtf8.constData());
 		if(tag.NumFrames() > 0)
 		{
@@ -138,22 +139,28 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		//if we didn't get a song name from the id3 tag, use the file name
 		if(song == NULL)
 		{
-			song = fileName.toUtf8().constData();
+			song = nameUtf8.constData();
 		}
 		
 		//add the artist to the database
 		id artistId;
-		if(artist != NULL )
+		if(artist != NULL && strcmp(artist, ""))
 			artistId = db.add_artist(artist);
 		else
-			artistId = 0;
-			
+			artistId = db.add_artist("Unknown");
+		
+		//if the album is missing, use the name "Tracks by ..." for it
+		auto a=db.find_artist(artistId);
+		auto unnamed=QString("Tracks by %1").arg(a->name).toUtf8();
+		
+		qDebug()<<"id3 album name: "<<album;
+		
 		//add the album to the database
 		id albumId;
-		if(album != NULL )
+		if(album != NULL && strcmp(album, ""))
 			albumId = db.add_album(artistId, album);
 		else
-			albumId = 0;
+			albumId = db.add_album(artistId, unnamed.constData());
 		
 		printf("song path=%s\n", pathUtf8.constData());
 		id theId = db.add_song(pathUtf8.constData());

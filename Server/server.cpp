@@ -161,10 +161,12 @@ void send_album_with_deps(Client* c, const Album* b, Database* db)
 	auto tracks=b->get_tracks();
 	unsigned int i;
 	printf("n_tracks: %u\n", b->get_n_tracks());
+	printf("artist_id: %u\n", b->artist_id);
 	printf("sending tracks: %p\n", tracks);
 	for(i=0; i<b->get_n_tracks(); i++)
 	{
-		printf("sending track %u\n", tracks[i]);
+		if(tracks[i] != 0)
+			printf("sending track %u\n", tracks[i]);
 		if(!c->knows_song(tracks[i]))
 		{
 			auto s=db->find_song(tracks[i]);
@@ -458,27 +460,27 @@ class Server: public QObject
 			//nyi
 		}
 		
-		#define do_list(foo, parse) \
+		#define do_list(foo, field, parse) \
 			unsigned int start, length;\
 			parse;\
 			auto matches=db->list_##foo##s(filters, start, length);\
 			unsigned int i;\
 			for(i=0; i<matches.size(); i++)\
 			{\
-				printf("sending %s\n", #foo);\
+				printf("sending %s %s\n", #foo, matches[i]->field);\
 				send_##foo##_with_deps(c, matches[i], db);\
 			}
 		
 		void list_songs(Client* c, const QStringList& args)
 		{
-			do_list(song, auto filters=parse_filters(args, &start, &length))
+			do_list(song, title, auto filters=parse_filters(args, &start, &length))
 		}
 		void list_albums(Client* c, const QStringList& args)
 		{
 			if(args.size()>3)
 			{
 				auto utf8=args[3].toUtf8();
-				do_list(album, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
+				do_list(album, name, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
 			}
 		}
 		void list_artists(Client* c, const QStringList& args)
@@ -486,7 +488,7 @@ class Server: public QObject
 			if(args.size()>3)
 			{
 				auto utf8=args[3].toUtf8();
-				do_list(artist, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
+				do_list(artist, name, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
 			}
 		}
 		
