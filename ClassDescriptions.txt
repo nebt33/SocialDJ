@@ -1,0 +1,44 @@
+Social DJ Classes
+
+
+Server --> server.cpp
+A QT object that handles all of the communication with the clients.  Contains instances of all the other server 
+classes.  Parses client commands and call the appropriate functions of the other classes.
+
+
+FolderList --> FolderList.h FolderList.cpp
+Watches the file system where the songs are saved, and updates the database when new songs are added.
+
+
+Database --> Database.h 
+Contains all of the artists, albums, and songs.  Is automatically updated as the file system changes.
+
+
+Song --> item.h
+The struct that defines the song class and its parameters.
+
+
+Artist --> item.h
+The struct that defines the artist class and its parameters.
+
+
+Album --> item.h
+The struct that defines the album class and its parameters.
+
+
+Player --> Player.h Player.cpp
+Contains the QMediaPlayer object that plays our mp3s.  Has music player controls pause, skip, and play.  
+Plays new songs when the queue changes and calls newSong passing the song that will be played.
+
+
+Queue --> Queue.h Queue.cpp
+Contains all of the songs submitted by the clients.  Clients can then vote on those songs and the queue
+will sort itself based on this vote values.  When a song ends or is skipped the top song is popped off 
+of the queue and becomes the currently playing song.  The queue sends these updates to the player.
+
+
+QueueObject --> Queue.h
+A structure that emulates a song in the queue.  Keeps track of the song, the number of votes for that 
+song, who submitted the song, and which users have voted for that song.
+
+ 
