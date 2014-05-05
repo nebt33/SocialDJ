@@ -1,5 +1,16 @@
 Social DJ Classes
 
+###Server Compilation
+Compilation Instructions 
+Download git-hub
+Download mingw 4.8.2
+Download QT 5.2
+"git init" in a directory
+git pull https://github.com/nebt33/SocialDJ-Server.git
+navigate to Server directory
+run mingw32-make
+run Server.exe in release
+###
 
 Server --> server.cpp
 A QT object that handles all of the communication with the clients.  Contains instances of all the other server 
