@@ -25,7 +25,7 @@ client->server messages:
 	song database:
 		download_song|url
 		list_songs|start|count[|metaitem|value]
-		list_albums|start|count|query
+		list_albums|start|count[|metaitem|value]
 		list_artists|start|count|query
 		delete_song|song_id
 	queue:
@@ -35,4 +35,5 @@ client->server messages:
 		play
 		pause
 		skip
-metaitems are one of: artist, album, title, duration
+metaitems are one of: artist id, album id, name string, duration value
+counts are 0 to indicate "all".

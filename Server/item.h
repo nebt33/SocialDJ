@@ -10,11 +10,11 @@ typedef long long client_id;
 
 struct Album
 {
-	Album(id b, id artist, const char* album_name){bid=b; artist_id=artist; name=strdup(album_name);};
+	Album(id b, id artist, const char* album_name){bid=b; aid=artist; name=strdup(album_name);};
 	~Album() {free(name);}
 	void add_track(id t){};
 	
-	const char* get_name() const {return this->name;};//may be NULL, e.g. if the album title is unknown
+	const char* get_name() const {return this->name;};//may be NULL, e.g. if the album name is unknown
 	unsigned int get_n_tracks() const {return this->tracks.size();};//returns how many tracks the album has; if we don't have all tracks on the album this would be the highest known track number
 	const id* get_tracks() const {return this->tracks.data();};//returns an array of track IDs, with 0s in the spots where no track is known
 	id get_id() const {return this->bid;};
@@ -29,7 +29,7 @@ struct Album
 	}
 	
 	id bid;
-	id artist_id;
+	id aid;
 	char* name=nullptr;
 	std::vector<id> tracks;
 };
@@ -47,20 +47,20 @@ struct Artist
 
 struct Song
 {
-	Song(id s, id album_id, id artist_id, const char* song_title, const char* song_path){sid=s; album=album_id; artist=artist_id; title=song_title?strdup(song_title):nullptr; path=strdup(song_path);};
-	~Song(){free(title);free(path);}
+	Song(id s, id album_id, id artist_id, const char* song_name, const char* song_path){sid=s; bid=album_id; aid=artist_id; name=song_name?strdup(song_name):nullptr; path=strdup(song_path);};
+	~Song(){free(name);free(path);}
 	void set_duration(unsigned int tenths){this->duration = tenths;}
 	
-	id get_album() const {return this->album;};//may be 0
-	id get_artist() const {return this->artist;};//may be 0
-	const char* get_title() const {return this->title;};
+	id get_album() const {return this->bid;};//may be 0
+	id get_artist() const {return this->aid;};//may be 0
+	const char* get_name() const {return this->name;};
 	unsigned int get_duration() const {return this->duration;};//may be 0 if unknown, integer is in tenths of a second
 	id get_id() const {return this->sid;};
 	
 	id sid;
-	id album;
-	id artist;
-	char* title=nullptr;
+	id bid;
+	id aid;
+	char* name=nullptr;
 	unsigned int duration=0;
 	char* path;
 };

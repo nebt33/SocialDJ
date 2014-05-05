@@ -87,17 +87,17 @@ struct Client : QObject
 		{
 			info_msg+=QString("|duration|%1").arg(s.duration);
 		}
-		if(s.artist != 0)
+		if(s.aid != 0)
 		{
-			info_msg+=QString("|artist|%1").arg(s.artist);
+			info_msg+=QString("|artist|%1").arg(s.aid);
 		}
-		if(s.album != 0)
+		if(s.bid != 0)
 		{
-			info_msg+=QString("|album|%1").arg(s.album);
+			info_msg+=QString("|album|%1").arg(s.bid);
 		}
-		if(s.title != nullptr)
+		if(s.name != nullptr)
 		{
-			info_msg+=QString("|title|%1").arg(s.title);
+			info_msg+=QString("|name|%1").arg(s.name);
 		}
 		info_msg+="\n";
 		auto utf8=info_msg.toUtf8();
@@ -115,7 +115,7 @@ struct Client : QObject
 		auto album_message=QString("new_album|%1\n").arg(b.get_id());
 		auto utf8=album_message.toUtf8();
 		socket->write(utf8);
-		auto info_message=QString("album_info|%1|%2|%3|").arg(b.get_id()).arg(b.name).arg(b.artist_id);
+		auto info_message=QString("album_info|%1|%2|%3|").arg(b.get_id()).arg(b.name).arg(b.aid);
 			unsigned int i;
 			auto tracks=b.get_tracks();
 			for(i=0; i<b.get_n_tracks(); i++)
@@ -161,7 +161,7 @@ void send_album_with_deps(Client* c, const Album* b, Database* db)
 	auto tracks=b->get_tracks();
 	unsigned int i;
 	printf("n_tracks: %u\n", b->get_n_tracks());
-	printf("artist_id: %u\n", b->artist_id);
+	printf("artist_id: %u\n", b->aid);
 	printf("sending tracks: %p\n", tracks);
 	for(i=0; i<b->get_n_tracks(); i++)
 	{
@@ -218,8 +218,8 @@ std::vector<ItemFilter> parse_filters(const QStringList& args, unsigned int* sta
 			m=ARTIST;
 		else if(*it == "album")
 			m=ALBUM;
-		else if(*it == "title")
-			m=TITLE;
+		else if(*it == "name")
+			m=NAME;
 		else if(*it == "duration")
 			m=DURATION;
 		else
@@ -429,7 +429,7 @@ class Server: public QObject
 				auto score=queue->evaluateVote(value>0, s, c->mac);
 				
 				//send all clients the score modification
-				auto score_msg=QString("score|%1|%2").arg(song_id).arg(score);
+				auto score_msg=QString("score|%1|%2\n").arg(song_id).arg(score);
 				auto utf8=score_msg.toUtf8();
 				
 				unsigned int i;
@@ -473,14 +473,14 @@ class Server: public QObject
 		
 		void list_songs(Client* c, const QStringList& args)
 		{
-			do_list(song, title, auto filters=parse_filters(args, &start, &length))
+			do_list(song, name, auto filters=parse_filters(args, &start, &length))
 		}
 		void list_albums(Client* c, const QStringList& args)
 		{
 			if(args.size()>3)
 			{
 				auto utf8=args[3].toUtf8();
-				do_list(album, name, auto filters=utf8.constData(); parse_lengths(args, &start, &length))
+				do_list(album, name, auto filters=parse_filters(args, &start, &length))
 			}
 		}
 		void list_artists(Client* c, const QStringList& args)

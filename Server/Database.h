@@ -6,6 +6,7 @@
 #include <map>
 #include <cstring>
 #include <algorithm>
+#include <vector>
 #include <assert.h>
 #define ID3LIB_LINKOPTION 1
 #include <id3/tag.h>
@@ -34,7 +35,7 @@
 	}\
 }
 
-//cmp_class(SongTitle,Song,title);
+//cmp_class(SongName,Song,name);
 //cmp_class(ArtistName,Artist,name);
 //cmp_class(AlbumName,Album,name);
 
@@ -63,7 +64,7 @@ enum MetaItem
 {
 	ARTIST,
 	ALBUM,
-	TITLE,
+	NAME,
 	DURATION,
 };
 
@@ -114,7 +115,7 @@ struct Database
 				delete a;
 			}
 		}
-		songs.erase(s->title);
+		songs.erase(s->name);
 		
 		//TODO: if the song's artist reaches 0 tracks, delete it
 		
@@ -129,7 +130,7 @@ struct Database
 		if(!s) return NULL;
 	};
 	
-	//creates the album if it doesn't exist, and returns the id for an album with that title
+	//creates the album if it doesn't exist, and returns the id for an album with that name
 	id add_album(id artist_id, const char* name)
 	{
 		if(!name) return 0;
@@ -164,12 +165,12 @@ struct Database
 		printf("added song %u\n", song_id);
 		auto s=new Song(song_id, 0, 0, nullptr, path);
 		song_ids[song_id]=s;
-		songs[s->title]=song_id;
+		songs[s->name]=song_id;
 		return song_id;
 	};
 	
 	//fill in song info, maybe replacing old info
-	void update_song(id which, const char* title, id artist, id album, unsigned int album_index, unsigned int duration)
+	void update_song(id which, const char* name, id artist, id album, unsigned int album_index, unsigned int duration)
 	{
 		Song* s=find_song(which);
 		if(!s)
@@ -178,16 +179,16 @@ struct Database
 			return;
 		}
 		
-		if(s->title)
+		if(s->name)
 		{
-			delete s->title;
-			s->title=nullptr;
+			delete s->name;
+			s->name=nullptr;
 		}
-		s->title=strdup(title);
-		s->artist=artist;
-		s->album=album;
+		s->name=strdup(name);
+		s->aid=artist;
+		s->bid=album;
 		
-		Album* b=find_album(s->album);
+		Album* b=find_album(s->bid);
 		if(b)
 		{
 			b->set_id_at(album_index, which);
@@ -195,51 +196,51 @@ struct Database
 		updated_cb(s);
 	};
 	
-	std::vector<Song*> list_songs(std::vector<ItemFilter>& filt, int start, int length)
-	{
-		int index=0;
-		printf("called list_songs\n");
-		std::vector<Song*> results;
-		for(auto i=song_ids.begin(); i!=song_ids.end(); ++i)
-		{
-			auto song=std::get<1>(*i);
-			auto matches=true;
-				if(index<start || index>=start+length)
-					matches=false;
-			unsigned int j;
-			for(j=0; j<filt.size(); j++)
-			{
-				switch(filt[j].field)
-				{
-					case ARTIST:
-						//TODO: nyi
-						matches&=false;
-						break;
-					case ALBUM:
-						//TODO: nyi
-						matches&=false;
-						break;
-					case TITLE:
-						matches&=song->title && !!strstr(song->title, filt[j].value.constData());
-						break;
-					case DURATION:
-						//TODO: nyi
-						matches&=false;
-						break;
-				}
-				if(!matches)
-					break;
-			}
-			if(matches)
-			{
-				results.push_back(song);
-				index++;
-			}
-		}
-		return results;
+	#define list_filter(Type,tname,fieldname) std::vector<Type*> list_##tname##s(std::vector<ItemFilter>& filt, int start, int count)\
+	{\
+		int index=0;\
+		printf("called list_" #tname "s\n");\
+		std::vector<Type*> results;\
+		for(auto i=tname##_ids.begin(); i!=tname##_ids.end(); ++i)\
+		{\
+			auto candidate=std::get<1>(*i);\
+			auto matches=true;\
+				if(index<start || (count > 0 && index>=start+count))\
+					matches=false;\
+			unsigned int j;\
+			for(j=0; j<filt.size(); j++)\
+			{\
+				switch(filt[j].field)\
+				{\
+					case ARTIST:\
+						{\
+						matches&=candidate->aid == filt[j].value.toUInt();\
+						break;}\
+					case ALBUM:\
+						{\
+						matches&=candidate->bid == filt[j].value.toUInt();\
+						break;}\
+					case NAME:\
+						{matches&=candidate->fieldname && !!strstr(candidate->fieldname, filt[j].value.constData());\
+						break;}\
+					case DURATION:\
+						{/*TODO: nyi*/\
+						matches&=false;\
+						break;}\
+				}\
+				if(!matches)\
+					break;\
+			}\
+			if(matches)\
+			{\
+				results.push_back(candidate);\
+				index++;\
+			}\
+		}\
+		return results;\
 	}
 
-#define list_simple(Type,name,field) std::vector<Type*> list_##name##s(const char* query, int start, int length)\
+#define list_simple(Type,name,field) std::vector<Type*> list_##name##s(const char* query, int start, int count)\
 {\
 	std::vector<Type*> results;\
 	int index=0;\
@@ -248,7 +249,7 @@ struct Database
 		auto value=std::get<1>(*i);\
 		if(!!strstr(value->field, query))\
 		{\
-			if(index>=start && index<start+length)\
+			if(index>=start && (count>0 && index<start+count))\
 				results.push_back(value);\
 			index++;\
 		}\
@@ -256,7 +257,8 @@ struct Database
 	return results;\
 }
 
-	list_simple(Album,album,name)
+	list_filter(Song,song,name)
+	list_filter(Album,album,name)
 	list_simple(Artist,artist,name)
 	
 	std::unordered_map<id,Song*> song_ids;

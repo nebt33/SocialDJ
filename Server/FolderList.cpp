@@ -98,7 +98,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		ID3_Tag tag(pathUtf8.constData());
 		if(tag.NumFrames() > 0)
 		{
-			//get song title
+			//get song name
 			ID3_Frame* frame = tag.Find(ID3FID_TITLE);
 			if( NULL != frame)
 			{
