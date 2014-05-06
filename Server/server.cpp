@@ -33,33 +33,38 @@ struct Client : QObject
 	client_id mac=0;
 	
 	//returns whether successful
-	bool set_mac(int ip)
+	bool set_mac()
 	{
+		if(mac != 0)
+			return true;
+		
+		//shell out to the operating system's ARP table utility
 		QProcess process;
-		process.start(QString("arp -a %1").arg(ip));
+		process.start(QString("arp -a %1").arg(socket->peerAddress().toIPv4Address()));
+		process.waitForFinished(100);
 		auto bytes=process.readAllStandardOutput();
 		auto str=QString::fromLatin1(bytes);
-		auto regex=QRegularExpression(QString("([ :-](?<[0-9a-f]{2})){6}"));
+		auto regex=QRegularExpression(QString("([\\ \\:\\-]([0-9a-f]{2})){6}"));
 		auto index=str.indexOf(regex);
 		if(index == -1)
 			return false;
-		
 		mac=0;
 		//parse MAC address from matched 18-char string
 		int i;
-		for(i=index; i<index+6*3; i++);
+		for(i=index; i<(index+6*3); i++)
 		{
 			char c=str[i].cell();
 			int nibble=-1;
-			if(c>='0' || c<='9')
+			if(c>='0' && c<='9')
 				nibble=c-'0';
-			else if(c>='a' || c<='f')
+			else if(c>='a' && c<='f')
 				nibble=c-'a'+10;
-			else if(c>='A' || c<='F')
+			else if(c>='A' && c<='F')
 				nibble=c-'A'+10;
 			if(nibble != -1)
 				mac=(mac<<4)+nibble;
 		}
+		printf("parsed %llu\n", mac);
 		return true;
 	}
 	
@@ -535,6 +540,7 @@ class Server: public QObject
 			printf("client connected\n");
 			auto c=new Client([&](Client* c, const QString& line){printf("got: %s\n", line.toUtf8().constData()); this->client_message(c, line);});
 			c->socket=listen_socket->nextPendingConnection();
+			c->set_mac();
 			clients.push_back(c);
 			
 			auto send_queue_song=[&](const Song* s, int score)
