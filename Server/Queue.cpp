@@ -42,8 +42,8 @@ void Queue::insertSong(const Song *s, client_id submitterID)
 }
 
 
-//Increase is 1 for an upvote and -1 for a downvote
-int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
+//value is 1 for an upvote and -1 for a downvote
+int Queue::evaluateVote(int value, const Song *s, client_id submitterID)
 {
 	int score = 0;
 	QueueObject* currentSong = nullptr;
@@ -62,44 +62,19 @@ int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 	//See if the submitter of this vote has voted for this song already
 	auto clientVoted = currentSong->clientsVoted.find(submitterID);
 	
-	
-	//If the client has already upvoted or downvoted a song and they have changed their minds
-	//This vote counts as two in the oppisite direction
-	if(clientVoted != currentSong->clientsVoted.end() && currentSong->clientsVoted.at(submitterID) != increase)
+	//If the client has already upvoted or downvoted a song and they have changed their minds, remove the old vote first
+	if(clientVoted != currentSong->clientsVoted.end())
 	{
-		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
-		{
-			if(it->song == currentSong->song)
-			{
-				if(increase == 1)
-					it->numVotes+= 2;
-				else
-					it->numVotes-= 2;
-				
-				queue.sort(compareVotes);
-				score = it->numVotes;
-				currentSong->clientsVoted[submitterID] = increase;
-			}
-		}
+		currentSong->numVotes -= std::get<1>(*clientVoted);
 	}
-	//Only increase the votes if the song is not the song that is currently playing and if the client has not
-	//already voted for this song
-	if(clientVoted == currentSong->clientsVoted.end() && currentSong->song != currentlyPlaying)
+	
+	//add the new vote
 	{
-		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
-		{
-			if(it->song == currentSong->song)
-			{
-				if(increase == 1)
-					it->numVotes++;
-				else
-					it->numVotes--;
-				
-				queue.sort(compareVotes);
-				score = it->numVotes;
-				currentSong->clientsVoted[submitterID] = increase;
-			}
-		}
+		currentSong->numVotes += value;
+		
+		queue.sort(compareVotes);
+		score = currentSong->numVotes;
+		currentSong->clientsVoted[submitterID] = value;
 	}
 	
 	return score;

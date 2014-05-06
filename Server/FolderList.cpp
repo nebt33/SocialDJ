@@ -109,7 +109,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 				songUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
 				song = songUtf8.constData();
 			}
-			qDebug()<<"id3 song name:"<<song;
+			//qDebug()<<"id3 song name:"<<song;
 			
 			//get album name
 			frame = tag.Find(ID3FID_ALBUM);
@@ -119,7 +119,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 				albumUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
 				album = albumUtf8.constData();
 			}
-			qDebug()<<"id3 album name:"<<album;
+			//qDebug()<<"id3 album name:"<<album;
 			
 			//get artist name
 			frame = tag.Find(ID3FID_LEADARTIST);
@@ -129,7 +129,7 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 				artistUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
 				artist = artistUtf8.constData();
 			}
-			qDebug()<<"id3 artist name:"<<artist;
+			//qDebug()<<"id3 artist name:"<<artist;
 			
 			//get song index on album
 			frame = tag.Find(ID3FID_TRACKNUM);
@@ -164,17 +164,17 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		if(album != NULL && strcmp(album, ""))
 		{
 			albumId = db.add_album(artistId, album);
-			qDebug()<<"adding named album: "<<album<<albumId<<"by"<<artistId;
+			//qDebug()<<"adding named album: "<<album<<albumId<<"by"<<artistId;
 		}
 		else
 		{
 			albumId = db.add_album(artistId, unnamed.constData());
-			qDebug()<<"adding unnamed album: "<<unnamed.constData()<<albumId<<"by"<<artistId;
+			//qDebug()<<"adding unnamed album: "<<unnamed.constData()<<albumId<<"by"<<artistId;
 		}
 		
 		id theId = db.add_song(pathUtf8.constData());
 		
-		printf("update_song(%u, %s, %u, %u, %u, %u); path=%s\n", theId, song, artistId, albumId, index, duration, pathUtf8.constData());
+		//printf("update_song(%u, %s, %u, %u, %u, %u); path=%s\n", theId, song, artistId, albumId, index, duration, pathUtf8.constData());
 		db.update_song(theId, song, artistId, albumId, index, duration);
 	}
 }

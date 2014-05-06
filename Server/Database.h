@@ -165,7 +165,6 @@ struct Database
 		printf("added song %u\n", song_id);
 		auto s=new Song(song_id, 0, 0, nullptr, path);
 		song_ids[song_id]=s;
-		songs[s->name]=song_id;
 		return song_id;
 	};
 	
@@ -181,10 +180,12 @@ struct Database
 		
 		if(s->name)
 		{
+			songs.erase(s->name);
 			delete s->name;
 			s->name=nullptr;
 		}
 		s->name=strdup(name);
+		songs[s->name]=song_id;
 		s->aid=artist;
 		s->bid=album;
 		
@@ -199,18 +200,18 @@ struct Database
 	#define list_filter(Type,type) std::vector<Type*> list_##type##s(std::vector<ItemFilter>& filt, int start, int count)\
 	{\
 		int index=0;\
-		printf("called list_" #type "s\n");\
+		printf("called list_" #type "s %d %d\n", start, count);\
 		std::vector<Type*> results;\
 		for(auto i=type##s.begin(); i!=type##s.end(); ++i)\
 		{\
 			auto cand_id=std::get<1>(*i);\
 			auto candidate=type##_ids[cand_id];\
 			auto matches=true;\
-				if(index<start || (count > 0 && index>=start+count))\
-					matches=false;\
 			unsigned int j;\
 			for(j=0; j<filt.size(); j++)\
 			{\
+				if(!matches)\
+					break;\
 				switch(filt[j].field)\
 				{\
 					case ARTIST:\
@@ -229,14 +230,11 @@ struct Database
 						matches&=false;\
 						break;}\
 				}\
-				if(!matches)\
-					break;\
 			}\
-			if(matches)\
-			{\
+			if(matches && (index>=start && (count == 0 || index<start+count)))\
 				results.push_back(candidate);\
+			if(matches)\
 				index++;\
-			}\
 		}\
 		return results;\
 	}
@@ -251,7 +249,7 @@ struct Database
 		auto value=type##_ids[val_id];\
 		if(!!strstr(value->name, query))\
 		{\
-			if(index>=start && (count>0 && index<start+count))\
+			if(index>=start && (count == 0 || index<start+count))\
 				results.push_back(value);\
 			index++;\
 		}\

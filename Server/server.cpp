@@ -435,7 +435,7 @@ class Server: public QObject
 				}
 				
 				//update queue
-				auto score=queue->evaluateVote(value>0, s, c->mac);
+				auto score=queue->evaluateVote(value, s, c->mac);
 				
 				//send all clients the score modification
 				auto score_msg=QString("score|%1|%2\n").arg(song_id).arg(score);
