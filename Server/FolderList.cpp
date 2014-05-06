@@ -153,8 +153,6 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		auto a=db.find_artist(artistId);
 		auto unnamed=QString("Tracks by %1").arg(a->name).toUtf8();
 		
-		qDebug()<<"id3 album name: "<<album;
-		
 		//add the album to the database
 		id albumId;
 		if(album != NULL && strcmp(album, ""))
@@ -168,10 +166,9 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 			qDebug()<<"adding unnamed album: "<<unnamed.constData()<<albumId<<"by"<<artistId;
 		}
 		
-		printf("song path=%s\n", pathUtf8.constData());
 		id theId = db.add_song(pathUtf8.constData());
 		
-		printf("update_song(%u, %s, %u, %u, %u, %u);\n", theId, song, artistId, albumId, index, duration);
+		printf("update_song(%u, %s, %u, %u, %u, %u); path=%s\n", theId, song, artistId, albumId, index, duration, pathUtf8.constData());
 		db.update_song(theId, song, artistId, albumId, index, duration);
 	}
 }

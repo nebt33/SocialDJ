@@ -393,19 +393,23 @@ class Server: public QObject
 				
 				//update queue
 				queue->insertSong(s, c->mac);
+				auto score=queue->getScore(s);
 				
 				//send all clients the queue modification
 				auto add_msg=QString("add_bottom|%1\n").arg(song_id);
-				auto utf8=add_msg.toUtf8();
+				auto add_utf8=add_msg.toUtf8();
+				auto score_msg=QString("score|%1|%2\n").arg(song_id).arg(score);
+				auto score_utf8=score_msg.toUtf8();
 				
 				unsigned int i;
 				for(i=0; i<clients.size(); i++)
 				{
 					if(!clients[i]->knows_song(song_id))
 					{
-						send_song_with_deps(c, s, db);
+						send_song_with_deps(clients[i], s, db);
 					}
-					clients[i]->socket->write(utf8);
+					clients[i]->socket->write(add_utf8);
+					clients[i]->socket->write(score_utf8);
 				}
 			}
 		}
@@ -532,7 +536,7 @@ class Server: public QObject
 			
 			if(queue->currentlyPlaying)
 			{
-				send_queue_song(queue->currentlyPlaying, 1000000);
+				send_queue_song(queue->currentlyPlaying, INT_MAX);
 			}
 			
 			//send the current state of the queue

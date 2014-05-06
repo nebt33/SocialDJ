@@ -55,9 +55,9 @@ int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 			currentSong = &*it;
 	}
 	
-	//if the song is not found in the queue, it's currentlyPlaying which has a pseudoscore of 1000000
+	//if the song is not found in the queue, it's currentlyPlaying which has a pseudoscore of INT_MAX
 	if(currentSong == nullptr)
-		return 1000000;
+		return INT_MAX;
 	
 	//See if the submitter of this vote has voted for this song already
 	auto clientVoted = currentSong->clientsVoted.find(submitterID);
@@ -119,19 +119,18 @@ void Queue::removeSong(const Song *s)
 
 int Queue::getScore(Song *s)
 {
-	int value;
-	if(s == currentSong)
-		return 1000000;
+	if(s == currentlyPlaying)
+		return INT_MAX;
 	else
 	{
 		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
 		{
-			if(it->song == currentSong->song)
+			if(it->song == s)
 			{
-				value = it->song->numVotes;
+        		return it->numVotes;
 			}
 		}
-		return value;
 	}
+	return INT_MIN;
 }
 

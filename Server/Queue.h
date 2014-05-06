@@ -49,7 +49,7 @@ struct Queue : public QObject
 		void insertSong(const Song *s, client_id submitterID);
 		void removeSong(const Song *s);
 		int evaluateVote(int increase, const Song *s, client_id submitterID);
-		int getScore(id songID);
+		int getScore(Song* song);
 				
 		Queue(Player *player, std::function<void(const Song*)> top_removed_cb)
 		{
