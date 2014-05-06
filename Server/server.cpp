@@ -447,16 +447,31 @@ class Server: public QObject
 		void play(Client* c, const QStringList& args)
 		{
 			player->play();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				clients[i]->socket->write("playing\n");
+			}
 		}
 		
 		void pause(Client* c, const QStringList& args)
 		{
 			player->pause();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				clients[i]->socket->write("paused\n");
+			}
 		}
 		
 		void skip(Client* c, const QStringList& args)
 		{
 			player->next();
+			unsigned int i;
+			for(i=0; i<clients.size(); i++)
+			{
+				clients[i]->socket->write("skip\n");
+			}
 		}
 		
 		void download_song(Client* c, const QStringList& args)
