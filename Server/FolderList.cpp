@@ -86,6 +86,9 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 {
 	if(fileName.endsWith(".mp3"))
 	{
+		QByteArray albumUtf8;
+		QByteArray songUtf8;
+		QByteArray artistUtf8;
 		const char* song = NULL;
 		const char* album = NULL;
 		const char* artist = NULL;
@@ -103,27 +106,30 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 			if( NULL != frame)
 			{
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
-				song = field->GetRawText();
+				songUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
+				song = songUtf8.constData();
 			}
-			//qDebug()<<"id3 song name: "<<song;
+			qDebug()<<"id3 song name:"<<song;
 			
 			//get album name
 			frame = tag.Find(ID3FID_ALBUM);
 			if( NULL != frame)
 			{
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
-				album = field->GetRawText();
+				albumUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
+				album = albumUtf8.constData();
 			}
-			//qDebug()<<"id3 album name: "<<album;
+			qDebug()<<"id3 album name:"<<album;
 			
 			//get artist name
 			frame = tag.Find(ID3FID_LEADARTIST);
 			if( NULL != frame)
 			{
 				ID3_Field* field = frame->GetField(ID3FN_TEXT);
-				artist = field->GetRawText();
+				artistUtf8 = QString(field->GetRawText()).trimmed().toUtf8();
+				artist = artistUtf8.constData();
 			}
-			//qDebug()<<"id3 artist name: "<<artist;
+			qDebug()<<"id3 artist name:"<<artist;
 			
 			//get song index on album
 			frame = tag.Find(ID3FID_TRACKNUM);
