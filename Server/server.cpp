@@ -256,7 +256,6 @@ class Server: public QObject
 	private:
 		Q_OBJECT
 	public:
-		bool quit;
 		std::vector<Client*> clients;
 		QTcpServer* listen_socket;
 		Queue* queue;
@@ -281,14 +280,13 @@ class Server: public QObject
 			createTrayIcon();
 			trayIcon->show();
 			
-			quit=false;
 			clients=std::vector<Client*>();
 			listen_socket=new QTcpServer(this);
 			listen_socket->connect(listen_socket, SIGNAL(newConnection()), this, SLOT(client_connected_cb()));
 			if(!listen_socket->listen(QHostAddress::Any, 8888))
 			{
 				QMessageBox::critical(nullptr, "Social DJ", listen_socket->errorString());
-				quit=true;
+				QCoreApplication::quit();
 			}
 		}
 		
