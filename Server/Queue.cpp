@@ -14,7 +14,7 @@ bool compareVotes(Queue::QueueObject &first, Queue::QueueObject &second)
 void Queue::insertSong(const Song *s, client_id submitterID)
 {
 	bool exists = false;
-	QueueObject newSong = QueueObject(submitterID, s, 1);
+	QueueObject newSong = QueueObject(submitterID, s);
 	
 	//Checks if the song is already in the queue, if so do not add and call evaluate vote for that song
 	for(std::list<QueueObject>::iterator it = this->queue.begin(); it != this->queue.end(); it++)

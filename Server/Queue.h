@@ -32,14 +32,12 @@ struct Queue : public QObject
 			const Song* song;
 			std::map<client_id, int> clientsVoted;
 			
-			QueueObject(client_id id, const Song *s, int increase)
+			QueueObject(client_id id, const Song *s)
 			{
 				song = s;
-				numVotes = 0;
 				submitterID = id;
-				clientsVoted[id] = increase;
 				//When a user inserts a new song into the queue, it enters with one vote.
-				numVotes = 1;
+				numVotes = 0;
 			}
 		};		
 		
