@@ -14,20 +14,20 @@
 #include <QByteArray>
 #include <QDebug>
 
-#define cmp_class(Name,Type,field) struct Name\
+#define cmp_class(Type) struct Type##Name\
 {\
 	bool operator()(const Type* const& a, const Type* const& b)\
 	{\
-		if(a->field)\
+		if(a->name)\
 		{\
-			if(b->field)\
-				return strcasecmp(a->field,b->field)<0;\
+			if(b->name)\
+				return strcasecmp(a->name,b->name)<0;\
 			else\
 				return 1;\
 		}\
 		else\
 		{\
-			if(b->field)\
+			if(b->name)\
 				return 0;\
 			else\
 				return 1;\
@@ -35,9 +35,9 @@
 	}\
 }
 
-//cmp_class(SongName,Song,name);
-//cmp_class(ArtistName,Artist,name);
-//cmp_class(AlbumName,Album,name);
+//cmp_class(Song);
+//cmp_class(Artist);
+//cmp_class(Album);
 
 struct StrSort
 {
@@ -196,12 +196,12 @@ struct Database
 		updated_cb(s);
 	};
 	
-	#define list_filter(Type,tname,fieldname) std::vector<Type*> list_##tname##s(std::vector<ItemFilter>& filt, int start, int count)\
+	#define list_filter(Type,type) std::vector<Type*> list_##type##s(std::vector<ItemFilter>& filt, int start, int count)\
 	{\
 		int index=0;\
-		printf("called list_" #tname "s\n");\
+		printf("called list_" #type "s\n");\
 		std::vector<Type*> results;\
-		for(auto i=tname##_ids.begin(); i!=tname##_ids.end(); ++i)\
+		for(auto i=type##_ids.begin(); i!=type##_ids.end(); ++i)\
 		{\
 			auto candidate=std::get<1>(*i);\
 			auto matches=true;\
@@ -213,15 +213,15 @@ struct Database
 				switch(filt[j].field)\
 				{\
 					case ARTIST:\
-						{\
+						{/*printf("checking aid %u == %u\n", filt[j].value.toUInt(), candidate->aid);*/\
 						matches&=candidate->aid == filt[j].value.toUInt();\
 						break;}\
 					case ALBUM:\
-						{\
+						{/*printf("checking bid %u == %u\n", filt[j].value.toUInt(), candidate->bid);*/\
 						matches&=candidate->bid == filt[j].value.toUInt();\
 						break;}\
 					case NAME:\
-						{matches&=candidate->fieldname && !!strstr(candidate->fieldname, filt[j].value.constData());\
+						{matches&=candidate->name && !!strstr(candidate->name, filt[j].value.constData());\
 						break;}\
 					case DURATION:\
 						{/*TODO: nyi*/\
@@ -240,14 +240,14 @@ struct Database
 		return results;\
 	}
 
-#define list_simple(Type,name,field) std::vector<Type*> list_##name##s(const char* query, int start, int count)\
+#define list_simple(Type,type) std::vector<Type*> list_##type##s(const char* query, int start, int count)\
 {\
 	std::vector<Type*> results;\
 	int index=0;\
-	for(auto i=name##_ids.begin(); i!=name##_ids.end(); ++i)\
+	for(auto i=type##_ids.begin(); i!=type##_ids.end(); ++i)\
 	{\
 		auto value=std::get<1>(*i);\
-		if(!!strstr(value->field, query))\
+		if(!!strstr(value->name, query))\
 		{\
 			if(index>=start && (count>0 && index<start+count))\
 				results.push_back(value);\
@@ -257,9 +257,9 @@ struct Database
 	return results;\
 }
 
-	list_filter(Song,song,name)
-	list_filter(Album,album,name)
-	list_simple(Artist,artist,name)
+	list_filter(Song,song)
+	list_filter(Album,album)
+	list_simple(Artist,artist)
 	
 	std::unordered_map<id,Song*> song_ids;
 	std::map<const char*,id,StrSort> songs;
