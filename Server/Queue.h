@@ -1,7 +1,7 @@
 ///Queue.h
 #include "item.h"
 #include <string.h>
-#include <unordered_set>
+#include <map>
 #include <list>
 #include <cctype>
 #include <QtGui>
@@ -30,14 +30,16 @@ struct Queue : public QObject
 			int numVotes;
 			client_id submitterID;
 			const Song* song;
-			std::unordered_set<client_id> clientsVoted;
+			std::map<client_id, int> clientsVoted;
 			
-			QueueObject(client_id id, const Song *s)
+			QueueObject(client_id id, const Song *s, int increase)
 			{
 				song = s;
 				numVotes = 0;
 				submitterID = id;
-				clientsVoted.insert(id);
+				clientsVoted[id] = increase;
+				//When a user inserts a new song into the queue, it enters with one vote.
+				numVotes = 1;
 			}
 		};		
 		
@@ -66,10 +68,10 @@ struct Queue : public QObject
 			//Song playing has ended or song has been skipped, pop top song of queue and set currentlyPlaying
 			if(status == 7 || status == 1)
 			{
+				if(currentlyPlaying)
+					top_removed(currentlyPlaying);
 				if(queue.size() > 0)
 				{
-					if(currentlyPlaying)
-						top_removed(currentlyPlaying);
 					currentlyPlaying = queue.front().song;
 					queue.pop_front();
 					connectedPlayer->newSong(currentlyPlaying);

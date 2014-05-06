@@ -14,7 +14,7 @@ bool compareVotes(Queue::QueueObject &first, Queue::QueueObject &second)
 void Queue::insertSong(const Song *s, client_id submitterID)
 {
 	bool exists = false;
-	QueueObject newSong = QueueObject(submitterID, s);
+	QueueObject newSong = QueueObject(submitterID, s, 1);
 	
 	//Checks if the song is already in the queue, if so do not add and call evaluate vote for that song
 	for(std::list<QueueObject>::iterator it = this->queue.begin(); it != this->queue.end(); it++)
@@ -37,15 +37,17 @@ void Queue::insertSong(const Song *s, client_id submitterID)
 	}
 	else
 	{
-		evaluateVote(true, s, submitterID);
+		evaluateVote(1, s, submitterID);
 	}
 }
 
 
+//Increase is 1 for an upvote and -1 for a downvote
 int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 {
 	int score = 0;
 	QueueObject* currentSong = nullptr;
+	
 	//Find the queueObject that corresponds to the song being voted on
 	for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
 	{
@@ -60,9 +62,29 @@ int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 	//See if the submitter of this vote has voted for this song already
 	auto clientVoted = currentSong->clientsVoted.find(submitterID);
 	
+	
+	//If the client has already upvoted or downvoted a song and they have changed their minds
+	//This vote counts as two in the oppisite direction
+	if(clientVoted != currentSong->clientsVoted.end() && currentSong->clientsVoted.at(submitterID) != increase)
+	{
+		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
+		{
+			if(it->song == currentSong->song)
+			{
+				if(increase == 1)
+					it->numVotes+= 2;
+				else
+					it->numVotes-= 2;
+				
+				queue.sort(compareVotes);
+				score = it->numVotes;
+				currentSong->clientsVoted[submitterID] = increase;
+			}
+		}
+	}
 	//Only increase the votes if the song is not the song that is currently playing and if the client has not
 	//already voted for this song
-	if(clientVoted != currentSong->clientsVoted.end() && currentSong->song != currentlyPlaying)
+	if(clientVoted == currentSong->clientsVoted.end() && currentSong->song != currentlyPlaying)
 	{
 		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
 		{
@@ -75,7 +97,7 @@ int Queue::evaluateVote(int increase, const Song *s, client_id submitterID)
 				
 				queue.sort(compareVotes);
 				score = it->numVotes;
-				currentSong->clientsVoted.insert(submitterID);
+				currentSong->clientsVoted[submitterID] = increase;
 			}
 		}
 	}
