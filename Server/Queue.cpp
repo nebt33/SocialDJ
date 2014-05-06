@@ -115,3 +115,23 @@ void Queue::removeSong(const Song *s)
 			queue.erase(it);
 	}
 }
+
+
+int Queue::getScore(Song *s)
+{
+	int value;
+	if(s == currentSong)
+		return 1000000;
+	else
+	{
+		for(std::list<QueueObject>::iterator it = queue.begin(); it != queue.end(); it++)
+		{
+			if(it->song == currentSong->song)
+			{
+				value = it->song->numVotes;
+			}
+		}
+		return value;
+	}
+}
+
