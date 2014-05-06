@@ -573,14 +573,13 @@ class Server: public QObject
 		{
 			folders->add_folders_by_choosing();
 		}
-		
 };
 
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 	
-	auto s=new Server(&app);
+	Server s(&app);
 	app.exec();
 	return 0;
 }

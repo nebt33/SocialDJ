@@ -131,16 +131,22 @@ struct Database
 	};
 	
 	//creates the album if it doesn't exist, and returns the id for an album with that name
-	id add_album(id artist_id, const char* name)
+	id add_album(id artist, const char* name)
 	{
 		if(!name) return 0;
-		auto it=albums.find(name);
-		if(it != albums.end())
-			return std::get<1>(*it);
+		auto it=albums.lower_bound(name);
+		while(it != albums.upper_bound(name))
+		{
+			id cand_id=std::get<1>(*it);
+			auto a=album_ids[cand_id];
+			if(a->aid == artist)
+				return cand_id;
+			++it;
+		}
 		++album_id;
-		auto b=new Album(album_id, artist_id, strdup(name));
+		auto b=new Album(album_id, artist, strdup(name));
 		album_ids[album_id]=b;
-		albums[b->name]=album_id;
+		albums.insert(std::make_pair(b->name, album_id));
 		return album_id;
 	};
 	
@@ -265,7 +271,7 @@ struct Database
 	std::map<const char*,id,StrSort> songs;
 	id song_id=0;
 	std::unordered_map<id,Album*> album_ids;
-	std::map<const char*,id,StrSort> albums;
+	std::multimap<const char*,id,StrSort> albums;
 	id album_id=0;
 	std::unordered_map<id,Artist*> artist_ids;
 	std::map<const char*,id,StrSort> artists;
