@@ -477,11 +477,7 @@ class Server: public QObject
 		}
 		void list_albums(Client* c, const QStringList& args)
 		{
-			if(args.size()>3)
-			{
-				auto utf8=args[3].toUtf8();
-				do_list(album, name, auto filters=parse_filters(args, &start, &length))
-			}
+			do_list(album, name, auto filters=parse_filters(args, &start, &length))
 		}
 		void list_artists(Client* c, const QStringList& args)
 		{

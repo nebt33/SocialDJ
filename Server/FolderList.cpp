@@ -158,9 +158,15 @@ static void addSongFromPath(QString dirPath, QString fileName, Database& db)
 		//add the album to the database
 		id albumId;
 		if(album != NULL && strcmp(album, ""))
+		{
 			albumId = db.add_album(artistId, album);
+			qDebug()<<"adding named album: "<<album<<albumId<<"by"<<artistId;
+		}
 		else
+		{
 			albumId = db.add_album(artistId, unnamed.constData());
+			qDebug()<<"adding unnamed album: "<<unnamed.constData()<<albumId<<"by"<<artistId;
+		}
 		
 		printf("song path=%s\n", pathUtf8.constData());
 		id theId = db.add_song(pathUtf8.constData());
