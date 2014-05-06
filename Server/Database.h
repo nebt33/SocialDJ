@@ -201,9 +201,10 @@ struct Database
 		int index=0;\
 		printf("called list_" #type "s\n");\
 		std::vector<Type*> results;\
-		for(auto i=type##_ids.begin(); i!=type##_ids.end(); ++i)\
+		for(auto i=type##s.begin(); i!=type##s.end(); ++i)\
 		{\
-			auto candidate=std::get<1>(*i);\
+			auto cand_id=std::get<1>(*i);\
+			auto candidate=type##_ids[cand_id];\
 			auto matches=true;\
 				if(index<start || (count > 0 && index>=start+count))\
 					matches=false;\
@@ -244,9 +245,10 @@ struct Database
 {\
 	std::vector<Type*> results;\
 	int index=0;\
-	for(auto i=type##_ids.begin(); i!=type##_ids.end(); ++i)\
+	for(auto i=type##s.begin(); i!=type##s.end(); ++i)\
 	{\
-		auto value=std::get<1>(*i);\
+		auto val_id=std::get<1>(*i);\
+		auto value=type##_ids[val_id];\
 		if(!!strstr(value->name, query))\
 		{\
 			if(index>=start && (count>0 && index<start+count))\
